@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <jni.h>
 #include <android/log.h>
-#include <dirent.h>
+#include <dlfcn.h>
 
 #include "main.h"
 #include "utilities/Logging.h"

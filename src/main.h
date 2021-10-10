@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Include/obfuscate.h"
+#include "include/obfuscate.h"
 
 #if defined(__arm__)
 #include "include/Substrate/SubstrateHook.h"

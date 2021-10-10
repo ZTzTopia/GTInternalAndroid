@@ -1,9 +1,10 @@
 #include <jni.h>
 #include <android/log.h>
+#include <dlfcn.h>
 
 #include "../main.h"
 #include "../gui/Gui.h"
-#include "../utilities/Logging.h";
+#include "../utilities/Logging.h"
 
 void InitHook();
 
