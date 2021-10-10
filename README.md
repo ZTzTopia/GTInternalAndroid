@@ -24,7 +24,7 @@ ndk-build
 ## Inject to growtopia
 ### 1. Decompile growtopia apk
 
-I highly recommend using `APK Easy Tools` but if you can't you can use the APK Editor on Android, because most likely there will be an error when recompiling the smali folder.
+I highly recommend using `APK Easy Tools` but if you can't use it you can use the `APK Editor` on Android. Because `APK Editor` most likely there will be an error when recompiling the smali folder.
 
 Or you can get growtopia with edited: [GrowtopiaLatestEdited](https://link-to.net/196297/growtopialatestedited)
 
