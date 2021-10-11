@@ -5,6 +5,7 @@
 Game::Game() {
     // NetMoving::collide() -> WorldTileMap::Collide()
     GameMemoryPatch.ModFly = MemoryPatch::createWithHex(GT(0xb5da1c), "00F020E3");
+    GameHackState.ModFlyChecked = false;
 }
 
 void Game::HackRender() {

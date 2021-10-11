@@ -1,5 +1,6 @@
 #include "GuiUtils.h"
 #include "Gui.h"
+#include "../utilities/Logging.h"
 
 bool GuiUtils::IsAnyScrollBarActive() {
     ImGuiWindow *window = ImGui::GetCurrentWindow();
@@ -13,15 +14,16 @@ bool GuiUtils::MouseOnImguiTitleBarWindow() {
     ImGuiWindow *window = ImGui::GetCurrentWindow();
     ImRect title_bar_rect = window->TitleBarRect();
 
-    // Maybe we no need g.HoveredWindow == window? but lazy to test xD
+    // Maybe we no need g.HoveredWindow == window?
     if (g.HoveredWindow == window && g.HoveredId == 0 && g.HoveredIdPreviousFrame == 0 &&
-       io.MousePos.x >= title_bar_rect.Min.x && io.MousePos.x <= title_bar_rect.Max.x &&
-       io.MousePos.y <= title_bar_rect.Min.y && io.MousePos.y >= title_bar_rect.Max.y
+        io.MousePos.x >= title_bar_rect.Min.x && io.MousePos.x <= title_bar_rect.Max.x &&
+        io.MousePos.y >= title_bar_rect.Min.y && io.MousePos.y <= title_bar_rect.Max.y
     ) {
-        return true;
+        // I don't know why if return true is detect the body.
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 void GuiUtils::ScrollWhenDraggingOnVoid() {
@@ -30,8 +32,8 @@ void GuiUtils::ScrollWhenDraggingOnVoid() {
     ImVec2 windowSize = ImGui::GetWindowSize();
 
     if (!IsAnyScrollBarActive() &&
-       io.MousePos.x >= windowPos.x && io.MousePos.x <= windowPos.x + windowSize.x &&
-       io.MousePos.y >= windowPos.y && io.MousePos.y <= windowPos.y + windowSize.y
+        io.MousePos.x >= windowPos.x && io.MousePos.x <= windowPos.x + windowSize.x &&
+        io.MousePos.y >= windowPos.y && io.MousePos.y <= windowPos.y + windowSize.y
     ) {
         ImVec2 mouse_delta = io.MouseDelta;
         if (mouse_delta.x != 0.0f && mouse_delta.x <= 100.0f) {
