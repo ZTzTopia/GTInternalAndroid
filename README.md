@@ -22,6 +22,16 @@ cd GrowtopiaImGui
 ndk-build
 ```
 
+You need [ninja](https://ninja-build.org/) build system to use ninja cmake generator.
+`cmake`:
+```shell
+mkdir build
+cd build
+cmake -GNinja -DCMAKE_MAKE_PROGRAM=/path/to/ninja.exe -DCMAKE_ANDROID_NDK=/path/to/android-ndk \
+  -DCMAKE_TOOLCHAIN_FILE=toolchains/android.cmake ..
+cmake --build .
+```
+
 ## Inject to growtopia
 ### 1. Decompile growtopia apk
 

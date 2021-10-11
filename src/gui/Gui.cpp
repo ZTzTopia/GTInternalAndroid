@@ -7,7 +7,20 @@ static bool g_initialized = false;
 #define MULT_X	0.00052083333f	// 1/1920
 #define MULT_Y	0.00092592592f 	// 1/1080
 
-void Gui::Init() {
+Gui::Gui() {
+    m_initialized = false;
+    m_screenSize = { 0.0, 0.0 };
+    m_needClearMousePos = false;
+}
+
+Gui::~Gui() {
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui::DestroyContext();
+    g_initialized = false;
+}
+
+void Gui::Init() const {
     if (g_initialized || Gui::m_screenSize.x == 0.0 && Gui::m_screenSize.y == 0.0) {
         return;
     }
@@ -27,11 +40,11 @@ void Gui::Init() {
     io.IniFilename = nullptr;
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    //ImGui::StyleColorsDark(); // it will make style colors classic
+    ImGui::StyleColorsClassic(); // it will make style colors dark
 
     // Setup Renderer backends
-    ImGui_ImplOpenGL3_Init("#version 100");
+    ImGui_ImplOpenGL3_Init();
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -73,17 +86,6 @@ void Gui::Init() {
     g_initialized = true;
 }
 
-void Gui::Shutdown() {
-    if (!g_initialized) {
-        return;
-    }
-
-    // Cleanup
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui::DestroyContext();
-    g_initialized = false;
-}
-
 void Gui::Render() {
     if (!g_initialized) {
         return;
@@ -95,7 +97,7 @@ void Gui::Render() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::Begin("Hello, world!", nullptr);
+    ImGui::Begin("Growtopia");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
 
@@ -118,19 +120,18 @@ bool Gui::OnTouchEvent(int type, float x, float y) {
     
     ImGuiIO& io = ImGui::GetIO();
 
-    // 2 = MOVE, 1 = POP, 0 = PUSH
     switch(type) {
-        case 0:
+        case eTouchEvent::TOUCH_MOVE:
             io.MousePos = ImVec2(x, y);
             io.MouseDown[0] = true;
             break;
 
-        case 1:
+        case eTouchEvent::TOUCH_POP:
             io.MouseDown[0] = false;
             m_needClearMousePos = true;
             break;
 
-        case 2:
+        case eTouchEvent::TOUCH_PUSH:
             io.MousePos = ImVec2(x, y);
             break;
 
@@ -140,6 +141,3 @@ bool Gui::OnTouchEvent(int type, float x, float y) {
 
     return true;
 }
-
-ImVec2 Gui::m_screenSize {0.0, 0.0};
-bool Gui::m_needClearMousePos {false};

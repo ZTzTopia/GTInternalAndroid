@@ -11,5 +11,11 @@
 #include "include/KittyMemory/MemoryBackup.hpp"
 #include "include/KittyMemory/MemoryPatch.hpp"
 
-extern void* g_GrowtopiaHandle;
+#include "gui/Gui.h"
+
+extern void* g_GrowtopiaAddress;
 extern ProcMap g_GrowtopiaMap;
+
+extern Gui* pGui;
+
+void DoMainPulse();

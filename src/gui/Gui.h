@@ -7,12 +7,24 @@
 
 class Gui {
 public:
-    static void Init();
-    static void Shutdown();
-    static void Render();
-    static bool OnTouchEvent(int type, float x, float y);
+    Gui();
+    ~Gui();
+
+    void Init() const;
+    void Render();
+    bool OnTouchEvent(int type, float x, float y);
+
+private:
+    enum eTouchEvent {
+        TOUCH_MOVE,
+        TOUCH_POP,
+        TOUCH_PUSH
+    };
 
 public:
-    static ImVec2 m_screenSize;
-    static bool m_needClearMousePos;
+    ImVec2 m_screenSize;
+
+private:
+    bool m_initialized;
+    bool m_needClearMousePos;
 };

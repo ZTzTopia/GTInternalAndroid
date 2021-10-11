@@ -1,5 +1,3 @@
-// TODO: obfuscate all string (ida 7.6 can deobfuscate the string)
-
 #include <unistd.h>
 #include <pthread.h>
 #include <jni.h>
@@ -11,10 +9,31 @@
 #include "utilities/CrashDump.h"
 #include "utilities/Utils.h"
 
-void* g_GrowtopiaHandle = nullptr;
+void* g_GrowtopiaAddress = nullptr;
 ProcMap g_GrowtopiaMap;
 
+Gui* pGui = nullptr;
+
 void InitHook();
+
+void InitInMenu() {
+    static bool initialized = false;
+
+    if (!initialized) {
+        pGui = new Gui();
+        pGui->Init();
+
+        initialized = true;
+    }
+}
+
+void DoMainPulse() {
+    InitInMenu();
+
+    if (pGui) {
+        pGui->Render();
+    }
+}
 
 void* main_thread(void*) {
     do {
@@ -22,9 +41,9 @@ void* main_thread(void*) {
         sleep(1);
     } while (!g_GrowtopiaMap.isValid());
 
-    g_GrowtopiaHandle = dlopen("/data/data/com.rtsoft.growtopia/lib/libgrowtopia.so", RTLD_NOLOAD);
-    if (g_GrowtopiaHandle == nullptr) {
-        LOGE("dlopen error: %s", dlerror());
+    g_GrowtopiaAddress = g_GrowtopiaMap.startAddr;
+    if (g_GrowtopiaAddress == nullptr) {
+        LOGE("Can not find growtopia start address!");
     }
 
     LOGI("libgrowtopia.so has been loaded.");
