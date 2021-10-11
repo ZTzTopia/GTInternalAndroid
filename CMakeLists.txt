@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.0)
 project(ModMenu VERSION 0.0.2 LANGUAGES CXX)
 
 FILE(GLOB FILE_INCLUDES
-        src/*.h* src/game/*.h*
-        src/game/*.h
+        src/*.h*
+        src/game/*.h*
+        src/game/*.h*
         src/gui/*.h*
         src/include/Substrate/*h*
         src/include/KittyMemory/*.h*
@@ -28,11 +29,23 @@ target_include_directories(${PROJECT_NAME} PRIVATE vendor/imgui)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE log android EGL GLESv2)
 
+set(BUILD_TYPE_COMPILER_FLAGS
+        -Wno-error=format-security
+        -fpermissive
+        -w
+        -Werror
+        -s
+        -fno-rtti
+        -fno-exceptions
+        -fms-extensions
+        -Wno-error=c++11-narrowing)
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(BUILD_TYPE_COMPILER_FLAGS )
+  set(BUILD_TYPE_COMPILER_FLAGS ${BUILD_TYPE_COMPILER_FLAGS})
   set(BUILD_TYPE_LINKER_FLAGS )
 else()
   set(BUILD_TYPE_COMPILER_FLAGS
+          ${BUILD_TYPE_COMPILER_FLAGS}
           -fvisibility=hidden
           -fvisibility-inlines-hidden
           -g0
@@ -51,17 +64,7 @@ else()
   endif()
 endif()
 
-target_compile_options(${PROJECT_NAME} PUBLIC
-        -Wno-error=format-security
-        -fpermissive
-        -w
-        -Werror
-        -s
-        -fno-rtti
-        -fno-exceptions
-        -fms-extensions
-        -Wno-error=c++11-narrowing
-        ${BUILD_TYPE_COMPILER_FLAGS})
+target_compile_options(${PROJECT_NAME} PUBLIC ${BUILD_TYPE_COMPILER_FLAGS})
 
 if(CMAKE_VERSION VERSION_LESS 3.13)
   set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY LINK_FLAGS ${BUILD_TYPE_LINKER_FLAGS})

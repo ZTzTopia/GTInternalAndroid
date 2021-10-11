@@ -8,11 +8,17 @@
 
 void PrintSymbol(void* pc, void* lr) {
     Dl_info info_pc, info_lr;
-    if (dladdr(pc, &info_pc) != 0)
-        LOGE("> %s", info_pc.dli_sname);
+    if (dladdr(pc, &info_pc) != 0) {
+        if (info_pc.dli_sname != "(null)") {
+            LOGE("> lr: %s", info_pc.dli_sname);
+        }
+    }
 
-    if (dladdr(lr, &info_lr) != 0)
-        LOGE("> %s", info_lr.dli_sname);
+    if (dladdr(lr, &info_lr) != 0) {
+        if (info_lr.dli_sname != "(null)") {
+            LOGE("> lr: %s", info_lr.dli_sname);
+        }
+    }
 }
 
 void CrashReport(ucontext* context, siginfo_t *info, const char* szTypeName) {

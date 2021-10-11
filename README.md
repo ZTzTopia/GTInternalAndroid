@@ -23,6 +23,7 @@ ndk-build
 ```
 
 You need [ninja](https://ninja-build.org/) build system to use ninja cmake generator.
+
 `cmake`:
 ```shell
 mkdir build

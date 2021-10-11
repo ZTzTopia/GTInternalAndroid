@@ -163,7 +163,7 @@ bool MemoryPatch::Restore() {
 bool MemoryPatch::Modify() {
     if (!isValid()) return false;
 
-    if (_is_nop)
+    if (!_is_nop)
         return (KittyMemory::memWrite(reinterpret_cast<void *>(_address), &_patch_code[0], _size) == Memory_Status::SUCCESS);
     else
         return (KittyMemory::makeNOP(reinterpret_cast<void *>(_address), _size) == Memory_Status::SUCCESS);

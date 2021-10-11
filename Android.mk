@@ -17,7 +17,6 @@ FILE_LIST += $(wildcard $(LOCAL_PATH)/src/gui/*.c*)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/src/include/Substrate/*.c*)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/src/include/KittyMemory/*.c*)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/src/utilities/*.c*)
-
 FILE_LIST += $(wildcard $(LOCAL_PATH)/vendor/imgui/*.c*)
 
 LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)

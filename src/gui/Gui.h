@@ -1,6 +1,7 @@
 #pragma once
 #ifdef __ANDROID__
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "imgui_impl_opengl3.h"
 #include <GLES2/gl2.h>
 #endif
@@ -10,9 +11,9 @@ public:
     Gui();
     ~Gui();
 
-    void Init() const;
+    void Init();
     void Render();
-    bool OnTouchEvent(int type, float x, float y);
+    bool OnTouchEvent(int type, bool multi, float x, float y);
 
 private:
     enum eTouchEvent {

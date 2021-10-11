@@ -11,7 +11,6 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <vector>
-#include <android/log.h>
 
 #define _SYS_PAGE_SIZE_         (sysconf(_SC_PAGE_SIZE))
 
@@ -170,6 +169,47 @@ namespace KittyMemory {
     Type callFunction(void *ptr, Type2...args) {
         if (ptr == nullptr)
             return Type();
+
+        int prot = GetMemoryPermission(ptr);
+        if (prot == 0) {
+            return Type();
+        }
+
+        if (!(prot & PROT_EXEC)) {
+            // From SubstrateHook
+            uint32_t *area(reinterpret_cast<uint32_t *>(ptr));
+            uint32_t *arm(area);
+
+            const size_t used(8);
+
+            uint32_t backup[used / sizeof(uint32_t)] = {arm[0], arm[1]};
+
+            size_t length(used);
+            for (unsigned offset(0); offset != used / sizeof(uint32_t); ++offset) {
+                if ((backup[offset] & 0x0c000000) == 0x04000000 && (backup[offset] & 0xf0000000) != 0xf0000000 && (backup[offset] & 0x000f0000) == 0x000f0000) {
+                    if ((backup[offset] & 0x02000000) == 0 ||
+                        (backup[offset] & 0x0000f000 >> 12) != (backup[offset] & 0x0000000f)
+                    ) {
+                        length += 2 * sizeof(uint32_t); // 16
+                    }
+                    else {
+                        length += 4 * sizeof(uint32_t); // 24
+                    }
+                }
+            }
+
+            length += 2 * sizeof(uint32_t); // 20 / 28
+
+            if (mprotect(ptr, length, _PROT_RX_) == -1) {
+                munmap(ptr, length);
+                return Type();
+            }
+
+            /*if (mprotect(ptr, 28, _PROT_RX_) == -1) {
+                munmap(ptr, 28);
+                 return Type();
+            }*/
+        }
 
         return reinterpret_cast<Type(__cdecl *)(Type2...)>(ptr)(args...);
     }

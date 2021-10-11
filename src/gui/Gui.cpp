@@ -1,11 +1,13 @@
 #include "Gui.h"
+#include "GuiUtils.h"
+#include "../game/Game.h"
 #include "../main.h"
 #include "../utilities/Logging.h"
 
-static bool g_initialized = false;
-
 #define MULT_X	0.00052083333f	// 1/1920
 #define MULT_Y	0.00092592592f 	// 1/1080
+
+extern Game* g_Game;
 
 Gui::Gui() {
     m_initialized = false;
@@ -17,11 +19,11 @@ Gui::~Gui() {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
-    g_initialized = false;
+    m_initialized = false;
 }
 
-void Gui::Init() const {
-    if (g_initialized || Gui::m_screenSize.x == 0.0 && Gui::m_screenSize.y == 0.0) {
+void Gui::Init() {
+    if (m_initialized) {
         return;
     }
 
@@ -32,7 +34,11 @@ void Gui::Init() const {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
 
-    // TODO: find screen size in growtopia lib
+    do {
+        Gui::m_screenSize.x = KittyMemory::callFunction<float>(GTS("_Z15GetScreenSizeXfv"));
+        Gui::m_screenSize.y = KittyMemory::callFunction<float>(GTS("_Z15GetScreenSizeYfv"));
+    } while (Gui::m_screenSize.x == 0.0 || Gui::m_screenSize.y == 0.0);
+
     io.DisplaySize = ImVec2(Gui::m_screenSize.x, Gui::m_screenSize.y);
 
     // Disable loading/saving of .ini file from disk.
@@ -40,7 +46,7 @@ void Gui::Init() const {
     io.IniFilename = nullptr;
 
     // Setup Dear ImGui style
-    //ImGui::StyleColorsDark(); // it will make style colors classic
+    // ImGui::StyleColorsDark(); // it will make style colors classic
     ImGui::StyleColorsClassic(); // it will make style colors dark
 
     // Setup Renderer backends
@@ -83,13 +89,16 @@ void Gui::Init() const {
     // FIXME: Put some effort into DPI awareness
     ImGui::GetStyle().ScaleAllSizes(3.0f);
 
-    g_initialized = true;
+    m_initialized = true;
 }
 
 void Gui::Render() {
-    if (!g_initialized) {
+    if (!m_initialized) {
         return;
     }
+
+    // For imgui checkbox
+    static bool checked = false;
 
     ImGuiIO& io = ImGui::GetIO();
 
@@ -97,9 +106,10 @@ void Gui::Render() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::Begin("Growtopia");
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::End();
+    // Render game hack imgui window
+    if (g_Game) {
+        g_Game->HackRender();
+    }
 
     // Rendering
     ImGui::EndFrame();
@@ -113,13 +123,12 @@ void Gui::Render() {
     }
 }
 
-bool Gui::OnTouchEvent(int type, float x, float y) {
-    if (!g_initialized) {
+bool Gui::OnTouchEvent(int type, bool multi, float x, float y) {
+    if (!m_initialized) {
         return false;
     }
-    
-    ImGuiIO& io = ImGui::GetIO();
 
+    ImGuiIO& io = ImGui::GetIO();
     switch(type) {
         case eTouchEvent::TOUCH_MOVE:
             io.MousePos = ImVec2(x, y);
@@ -138,6 +147,10 @@ bool Gui::OnTouchEvent(int type, float x, float y) {
         default:
             break;
     }
+
+    /*if (ImGui::IsWindowFocused()) {
+        return false;
+    }*/
 
     return true;
 }
