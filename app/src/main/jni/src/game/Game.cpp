@@ -9,16 +9,19 @@ Game::Game() {
         bx lr
      */
     // 0000A0E31EFF2FE1 - To return false
+
     /*
         mov r0, #0x1
         bx lr
      */
     // 0100A0E31EFF2FE1 - To return true
+
     /*
         mov r0, #0x7f000000
         bx lr
      */
     // 7F04A0E31EFF2FE1 - To return high value
+
     /*
         nop
      */

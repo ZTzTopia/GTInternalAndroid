@@ -65,7 +65,7 @@ void* main_thread(void*) {
     pthread_exit(nullptr);
 }
 
-__attribute__((constructor)) void constructor_main() {
+__unused __attribute__((constructor)) void constructor_main() {
     LOGD("Starting Growtopia ModMenu.. Build time: " __DATE__ " " __TIME__);
 
     // Init crash dump

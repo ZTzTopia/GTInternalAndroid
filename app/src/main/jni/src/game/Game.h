@@ -12,11 +12,13 @@ public:
     void AntiCheckpoint(bool checked);
 
 private:
-    struct _stGameMemoryPatch {
-        MemoryPatch ModFly, AntiCheckpoint;
-    } stGameMemoryPatch;
+    struct {
+        MemoryPatch ModFly;
+        MemoryPatch AntiCheckpoint;
+    } m_gameHack;
 
     struct _stGameHackState {
-        bool ModFlyChecked, AntiCheckpointChecked;
-    } stGameHackState;
+        bool ModFlyChecked;
+        bool AntiCheckpointChecked;
+    } m_gameHackState;
 };

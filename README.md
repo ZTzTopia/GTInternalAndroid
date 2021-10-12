@@ -11,11 +11,18 @@ Growtopia android modmenu with ImGUI.
 ## Requirements
 The following dependencies are required to build the library from source.
 - [NDK Android](https://developer.android.com/ndk).
-- [APK Easy Tools](https://forum.xda-developers.com/android/software-hacking/tool-apk-easy-tool-v1-02-windows-gui-t3333960) or APK Editor in android.
-- Any text editor. We use [Notepad++](https://notepad-plus-plus.org/)
+- [APK Easy Tools](https://forum.xda-developers.com/android/software-hacking/tool-apk-easy-tool-v1-02-windows-gui-t3333960).
+- Any text editor. We use [Notepad++](https://notepad-plus-plus.org/).
+
+For AIDE users (I'm not sure if this works 100%).
+- [AIDE CMods](https://www.mediafire.com/file/ihf3so9r9rc6yke/AIDE-_IDE_v3.2.210316__Unlocked.apk/file).
+- [NDK AIDE for arm32](https://www.mediafire.com/file/62l4gcxqsqtxy20/ndk_arm.tar.gz/file).
+- [NDK AIDE for arm64/aarch64](https://www.mediafire.com/file/w56tbt9pmqxzmpu/ndk_arm64.tar.gz/file).
+- APK Editor.
+
+There are many tutorials for installing on youtube, Attention if your android doesn't support arm then it won't work. one of them [AIDE CMods tutorial](https://youtu.be/VYvKEFHSgkg)
 
 ## Building the source
-Aide
 `ndk-build`:
 ```shell
 git clone https://github.com/ZTzTopia/GrowtopiaImGui.git
