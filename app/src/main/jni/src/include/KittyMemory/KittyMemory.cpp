@@ -182,12 +182,14 @@ Memory_Status KittyMemory::makeNOP(void *ptr, size_t len) {
         return INV_PROT;
 
     uintptr_t finalPtr = reinterpret_cast<uintptr_t>(ptr);
-    for (uintptr_t ptr = finalPtr; ptr != (finalPtr + (len * 2)); ptr += 2) {
+    for (uintptr_t ptr = finalPtr; ptr != (finalPtr + (len * 4)); ptr += 4) {
 #if defined(__aarch64__)
         /* ~ */
 #elif defined(__arm__)
         *(char*)ptr = 0x00;
-        *(char*)(ptr+1) = 0x46;
+        *(char*)(ptr+1) = 0xF0;
+        *(char*)(ptr+2) = 0x20;
+        *(char*)(ptr+3) = 0xE3;
 #endif
     }
 

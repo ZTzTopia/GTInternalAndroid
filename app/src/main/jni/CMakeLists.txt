@@ -25,7 +25,7 @@ add_library(${PROJECT_NAME} SHARED
         ${FILE_INCLUDES}
         ${FILE_SOURCES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE vendor/imgui)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE log android EGL GLESv2)
 

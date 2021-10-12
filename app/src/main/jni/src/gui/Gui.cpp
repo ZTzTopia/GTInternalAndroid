@@ -12,7 +12,10 @@ extern Game* g_Game;
 Gui::Gui() {
     m_initialized = false;
     m_screenSize = { 0.0, 0.0 };
-    m_needClearMousePos = false;
+    m_sendOnTouchEvent = 0;
+
+    // We need to clear the pos at first time
+    m_needClearMousePos = true;
 }
 
 Gui::~Gui() {
@@ -117,15 +120,22 @@ void Gui::Render() {
     glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+    if (ImGui::IsAnyItemActive()) {
+        m_sendOnTouchEvent = 1;
+    } else {
+        m_sendOnTouchEvent = 2;
+    }
+
     if (m_needClearMousePos) {
         io.MousePos = ImVec2(-1, -1);
         m_needClearMousePos = false;
     }
 }
 
-bool Gui::OnTouchEvent(int type, bool multi, float x, float y) {
+void Gui::OnTouchEvent(int type, bool multi, float x, float y) {
     if (!m_initialized) {
-        return false;
+        m_sendOnTouchEvent = 1;
+        return;
     }
 
     ImGuiIO& io = ImGui::GetIO();
@@ -147,10 +157,4 @@ bool Gui::OnTouchEvent(int type, bool multi, float x, float y) {
         default:
             break;
     }
-
-    /*if (ImGui::IsWindowFocused()) {
-        return false;
-    }*/
-
-    return true;
 }

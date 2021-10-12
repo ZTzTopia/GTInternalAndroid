@@ -13,7 +13,7 @@ public:
 
     void Init();
     void Render();
-    bool OnTouchEvent(int type, bool multi, float x, float y);
+    void OnTouchEvent(int type, bool multi, float x, float y);
 
 private:
     enum eTouchEvent {
@@ -24,6 +24,7 @@ private:
 
 public:
     ImVec2 m_screenSize;
+    int m_sendOnTouchEvent;
 
 private:
     bool m_initialized;

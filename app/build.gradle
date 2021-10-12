@@ -1,0 +1,48 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 30
+    defaultConfig {
+        applicationId 'com.ztz.modmenu'
+        minSdkVersion 19
+        targetSdkVersion 30
+        versionCode 1
+        versionName '2.9'
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
+        externalNativeBuild {
+            cmake {
+                version '3.18.1'
+                arguments '-GNinja', '-DCMAKE_ANDROID_NDK=C:/Users/Kiky/AppData/Local/Android/Sdk/ndk/21.4.7075529', '-DCMAKE_TOOLCHAIN_FILE=toolchains/android.cmake'
+            }
+        }
+        signingConfig signingConfigs.debug
+    }
+
+    buildTypes {
+        release {
+            shrinkResources false
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            shrinkResources false
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/jni/CMakeLists.txt'
+        }
+    }
+
+    ndkVersion '21.4.7075529'
+}
+
+//dependencies must be placed below 'android' brackets to get it work on AIDE
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
