@@ -10,7 +10,6 @@ LOCAL_CPPFLAGS := -Wno-error=format-security -fpermissive -w -Werror -s -std=c++
 LOCAL_CPPFLAGS += -fno-rtti -fno-exceptions -fms-extensions -Wno-error=c++11-narrowing
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/vendor/imgui
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/vendor/libmem
 
 FILE_LIST := $(wildcard $(LOCAL_PATH)/src/*.c*)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/src/game/*.c*)
