@@ -46,7 +46,7 @@ cmake --build .
 
 I highly recommend using `APK Easy Tools` but if you can't use it you can use the `APK Editor` on Android. Because `APK Editor` most likely there will be an error when recompiling the smali folder.
 
-Or you can get growtopia with edited: [GrowtopiaLatestEdited](https://link-to.net/196297/growtopialatestedited)
+Or you can get growtopia with edited: [GrowtopiaLatestEdited](https://bit.ly/3lHn4Vv)
 
 ### 2. Add your library to apk
 
