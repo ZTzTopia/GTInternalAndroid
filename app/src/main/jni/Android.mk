@@ -6,7 +6,7 @@ LOCAL_ARM_MODE := arm
 
 LOCAL_CFLAGS := -Wno-error=format-security -w
 LOCAL_CFLAGS += -fno-rtti -fno-exceptions -fpermissive
-LOCAL_CPPFLAGS := -Wno-error=format-security -fpermissive -w -Werror -s -std=c++17
+LOCAL_CPPFLAGS := -Wno-error=format-security -fpermissive -w -Werror -s -std=c++14
 LOCAL_CPPFLAGS += -fno-rtti -fno-exceptions -fms-extensions -Wno-error=c++11-narrowing
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/vendor/imgui
