@@ -1,10 +1,13 @@
 #pragma once
+#include <dlfcn.h>
 
 #include "include/obfuscate.h"
 
 #if defined(__arm__)
 #include "include/Substrate/SubstrateHook.h"
 #include "include/Substrate/CydiaSubstrate.h"
+#else
+#include "include/And64InlineHook/And64InlineHook.hpp"
 #endif
 
 #include "include/KittyMemory/KittyMemory.hpp"

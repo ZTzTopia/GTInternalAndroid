@@ -4,6 +4,7 @@
 #include "../utilities/Logging.h"
 
 Game::Game() {
+#if defined(__arm__)
     /*
         mov r0, #0x0
         bx lr
@@ -26,12 +27,42 @@ Game::Game() {
         nop
      */
     // 00F020E3 - NOP
-
+	
     // NetMoving::collide() -> WorldTileMap::Collide()
     m_gameHack.ModFly = MemoryPatch::nopPatch(GT(0xb5da1c), 1);
 
     // Tile::IsCheckpoint()
     m_gameHack.AntiCheckpoint = MemoryPatch::createWithHex(GT(0x88c4b0), "0000A0E31EFF2FE1");
+#else
+	/*
+        mov x0, #0
+		ret 
+     */
+    // 000080D2C0035FD6 - To return false
+
+    /*
+        mov x0, #0x1
+        ret
+     */
+    // 200080D2C0035FD6 - To return true
+
+    /*
+        mov x0, #0x7f000000
+        ret
+     */
+    // 00E0AFD2C0035FD6 - To return high value
+
+    /*
+        nop
+     */
+    // 1F2003D5 - NOP
+	
+	// NetMoving::collide() -> WorldTileMap::Collide()
+    m_gameHack.ModFly = MemoryPatch::createWithHex(GT(0xb5da1c), "1F2003D5");
+
+    // Tile::IsCheckpoint()
+    m_gameHack.AntiCheckpoint = MemoryPatch::createWithHex(GT(0x88c4b0), "000080D2C0035FD6");
+#endif
 
     m_gameHackState.ModFlyChecked = false;
     m_gameHackState.AntiCheckpointChecked = false;
