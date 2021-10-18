@@ -15,7 +15,7 @@ The following dependencies are required to build the library from source.
 - Any text editor. We use [Notepad++](https://notepad-plus-plus.org/).
 
 For AIDE users (I'm not sure if this works 100%).
-- [AIDE CMods](https://www.mediafire.com/file/ihf3so9r9rc6yke/AIDE-_IDE_v3.2.210316__Unlocked.apk/file).
+- [AIDE CMods](https://secufiles.com/nE9J/AIDE_CMODs_3.2.200108.apk).
 - [NDK AIDE for arm32](https://www.mediafire.com/file/62l4gcxqsqtxy20/ndk_arm.tar.gz/file).
 - [NDK AIDE for arm64/aarch64](https://www.mediafire.com/file/w56tbt9pmqxzmpu/ndk_arm64.tar.gz/file).
 - APK Editor.
@@ -25,7 +25,7 @@ There are many tutorials for installing on youtube, Attention if your android do
 ## Building the source
 `ndk-build`:
 ```shell
-git clone https://github.com/ZTzTopia/GrowtopiaImGui.git
+git clone https://github.com/ZTzTopia/GTInternalAndroid
 cd GrowtopiaImGui
 ndk-build
 ```
