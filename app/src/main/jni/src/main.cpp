@@ -51,7 +51,7 @@ void* main_thread(void*) {
     } while (!g_GrowtopiaMap.isValid());
 
     // This is for dlsym, dladdr
-    g_GrowtopiaHandle = dlopen("/data/data/com.rtsoft.growtopia/lib/libgrowtopia.so", RTLD_NOLOAD);
+    g_GrowtopiaHandle = dlopen("libgrowtopia.so", RTLD_NOLOAD);
     if (g_GrowtopiaHandle == nullptr) {
         LOGE("dlopen error: %s", dlerror());
     }
