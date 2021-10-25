@@ -1,31 +1,43 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(ModMenu VERSION 0.0.2 LANGUAGES CXX)
+project(ModMenu VERSION 0.0.2)
+
+ENABLE_LANGUAGE(C)
+ENABLE_LANGUAGE(CXX)
 
 FILE(GLOB FILE_INCLUDES
         src/*.h*
         src/game/*.h*
         src/game/*.h*
         src/gui/*.h*
-        src/include/Substrate/*h*
+        src/include/Substrate/*.h*
+        src/include/And64InlineHook/*.h*
         src/include/KittyMemory/*.h*
+        src/include/libmem/*.h*
         src/utilities/*.h*
-        vendor/imgui/*.h*)
+        vendor/imgui/*.h*
+        vendor/imgui/backends/*.h*
+        vendor/enet/include/enet/*.h*)
 
 FILE(GLOB FILE_SOURCES
         src/*.c*
         src/game/*.c*
         src/gui/*.c*
-        src/include/Substrate/*c*
+        src/include/Substrate/*.c*
+        src/include/And64InlineHook/*.c*
         src/include/KittyMemory/*.c*
+        src/include/libmem/*.c*
         src/utilities/*.c*
-        vendor/imgui/*.c*)
+        vendor/imgui/*.c*
+        vendor/imgui/backends/*.c*)
 
 add_library(${PROJECT_NAME} SHARED
         ${FILE_INCLUDES}
         ${FILE_SOURCES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
+target_include_directories(${PROJECT_NAME} PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/enet/include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE log android EGL GLESv2)
 

@@ -330,12 +330,12 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
     if (!clip_origin_lower_left) { float tmp = T; T = B; B = tmp; } // Swap top and bottom if origin is upper left
 #endif
     const float ortho_projection[4][4] =
-            {
-                    { 2.0f/(R-L),   0.0f,         0.0f,   0.0f },
-                    { 0.0f,         2.0f/(T-B),   0.0f,   0.0f },
-                    { 0.0f,         0.0f,        -1.0f,   0.0f },
-                    { (R+L)/(L-R),  (T+B)/(B-T),  0.0f,   1.0f },
-            };
+    {
+        { 2.0f/(R-L),   0.0f,         0.0f,   0.0f },
+        { 0.0f,         2.0f/(T-B),   0.0f,   0.0f },
+        { 0.0f,         0.0f,        -1.0f,   0.0f },
+        { (R+L)/(L-R),  (T+B)/(B-T),  0.0f,   1.0f },
+    };
     glUseProgram(bd->ShaderHandle);
     glUniform1i(bd->AttribLocationTex, 0);
     glUniformMatrix4fv(bd->AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
@@ -598,104 +598,104 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
     sscanf(bd->GlslVersionString, "#version %d", &glsl_version);
 
     const GLchar* vertex_shader_glsl_120 =
-            "uniform mat4 ProjMtx;\n"
-            "attribute vec2 Position;\n"
-            "attribute vec2 UV;\n"
-            "attribute vec4 Color;\n"
-            "varying vec2 Frag_UV;\n"
-            "varying vec4 Frag_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    Frag_UV = UV;\n"
-            "    Frag_Color = Color;\n"
-            "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-            "}\n";
+        "uniform mat4 ProjMtx;\n"
+        "attribute vec2 Position;\n"
+        "attribute vec2 UV;\n"
+        "attribute vec4 Color;\n"
+        "varying vec2 Frag_UV;\n"
+        "varying vec4 Frag_Color;\n"
+        "void main()\n"
+        "{\n"
+        "    Frag_UV = UV;\n"
+        "    Frag_Color = Color;\n"
+        "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
+        "}\n";
 
     const GLchar* vertex_shader_glsl_130 =
-            "uniform mat4 ProjMtx;\n"
-            "in vec2 Position;\n"
-            "in vec2 UV;\n"
-            "in vec4 Color;\n"
-            "out vec2 Frag_UV;\n"
-            "out vec4 Frag_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    Frag_UV = UV;\n"
-            "    Frag_Color = Color;\n"
-            "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-            "}\n";
+        "uniform mat4 ProjMtx;\n"
+        "in vec2 Position;\n"
+        "in vec2 UV;\n"
+        "in vec4 Color;\n"
+        "out vec2 Frag_UV;\n"
+        "out vec4 Frag_Color;\n"
+        "void main()\n"
+        "{\n"
+        "    Frag_UV = UV;\n"
+        "    Frag_Color = Color;\n"
+        "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
+        "}\n";
 
     const GLchar* vertex_shader_glsl_300_es =
-            "precision highp float;\n"
-            "layout (location = 0) in vec2 Position;\n"
-            "layout (location = 1) in vec2 UV;\n"
-            "layout (location = 2) in vec4 Color;\n"
-            "uniform mat4 ProjMtx;\n"
-            "out vec2 Frag_UV;\n"
-            "out vec4 Frag_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    Frag_UV = UV;\n"
-            "    Frag_Color = Color;\n"
-            "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-            "}\n";
+        "precision highp float;\n"
+        "layout (location = 0) in vec2 Position;\n"
+        "layout (location = 1) in vec2 UV;\n"
+        "layout (location = 2) in vec4 Color;\n"
+        "uniform mat4 ProjMtx;\n"
+        "out vec2 Frag_UV;\n"
+        "out vec4 Frag_Color;\n"
+        "void main()\n"
+        "{\n"
+        "    Frag_UV = UV;\n"
+        "    Frag_Color = Color;\n"
+        "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
+        "}\n";
 
     const GLchar* vertex_shader_glsl_410_core =
-            "layout (location = 0) in vec2 Position;\n"
-            "layout (location = 1) in vec2 UV;\n"
-            "layout (location = 2) in vec4 Color;\n"
-            "uniform mat4 ProjMtx;\n"
-            "out vec2 Frag_UV;\n"
-            "out vec4 Frag_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    Frag_UV = UV;\n"
-            "    Frag_Color = Color;\n"
-            "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-            "}\n";
+        "layout (location = 0) in vec2 Position;\n"
+        "layout (location = 1) in vec2 UV;\n"
+        "layout (location = 2) in vec4 Color;\n"
+        "uniform mat4 ProjMtx;\n"
+        "out vec2 Frag_UV;\n"
+        "out vec4 Frag_Color;\n"
+        "void main()\n"
+        "{\n"
+        "    Frag_UV = UV;\n"
+        "    Frag_Color = Color;\n"
+        "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
+        "}\n";
 
     const GLchar* fragment_shader_glsl_120 =
-            "#ifdef GL_ES\n"
-            "    precision mediump float;\n"
-            "#endif\n"
-            "uniform sampler2D Texture;\n"
-            "varying vec2 Frag_UV;\n"
-            "varying vec4 Frag_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    gl_FragColor = Frag_Color * texture2D(Texture, Frag_UV.st);\n"
-            "}\n";
+        "#ifdef GL_ES\n"
+        "    precision mediump float;\n"
+        "#endif\n"
+        "uniform sampler2D Texture;\n"
+        "varying vec2 Frag_UV;\n"
+        "varying vec4 Frag_Color;\n"
+        "void main()\n"
+        "{\n"
+        "    gl_FragColor = Frag_Color * texture2D(Texture, Frag_UV.st);\n"
+        "}\n";
 
     const GLchar* fragment_shader_glsl_130 =
-            "uniform sampler2D Texture;\n"
-            "in vec2 Frag_UV;\n"
-            "in vec4 Frag_Color;\n"
-            "out vec4 Out_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
-            "}\n";
+        "uniform sampler2D Texture;\n"
+        "in vec2 Frag_UV;\n"
+        "in vec4 Frag_Color;\n"
+        "out vec4 Out_Color;\n"
+        "void main()\n"
+        "{\n"
+        "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
+        "}\n";
 
     const GLchar* fragment_shader_glsl_300_es =
-            "precision mediump float;\n"
-            "uniform sampler2D Texture;\n"
-            "in vec2 Frag_UV;\n"
-            "in vec4 Frag_Color;\n"
-            "layout (location = 0) out vec4 Out_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
-            "}\n";
+        "precision mediump float;\n"
+        "uniform sampler2D Texture;\n"
+        "in vec2 Frag_UV;\n"
+        "in vec4 Frag_Color;\n"
+        "layout (location = 0) out vec4 Out_Color;\n"
+        "void main()\n"
+        "{\n"
+        "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
+        "}\n";
 
     const GLchar* fragment_shader_glsl_410_core =
-            "in vec2 Frag_UV;\n"
-            "in vec4 Frag_Color;\n"
-            "uniform sampler2D Texture;\n"
-            "layout (location = 0) out vec4 Out_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
-            "}\n";
+        "in vec2 Frag_UV;\n"
+        "in vec4 Frag_Color;\n"
+        "uniform sampler2D Texture;\n"
+        "layout (location = 0) out vec4 Out_Color;\n"
+        "void main()\n"
+        "{\n"
+        "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
+        "}\n";
 
     // Select shaders matching our GLSL versions
     const GLchar* vertex_shader = NULL;

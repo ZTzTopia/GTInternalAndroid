@@ -30,4 +30,4 @@ endif()
 # (https://gitlab.kitware.com/cmake/cmake/merge_requests/62)
 add_definitions("-DANDROID")
 
-include(${CMAKE_ANDROID_NDK}/build/cmake/android.toolchain.cmake)
+include(C:/Users/Kiky/AppData/Local/Android/Sdk/ndk/21.4.7075529/build/cmake/android.toolchain.cmake)

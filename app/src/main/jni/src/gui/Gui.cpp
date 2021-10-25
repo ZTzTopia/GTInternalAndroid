@@ -1,18 +1,19 @@
 #include "Gui.h"
 #include "GuiUtils.h"
+#include "Ui.h"
 #include "../game/Game.h"
 #include "../main.h"
-#include "../utilities/Logging.h"
 
 #define MULT_X	0.00052083333f	// 1/1920
 #define MULT_Y	0.00092592592f 	// 1/1080
 
 extern Game* g_Game;
 
+void SendOnTouchEvent(bool sendTruePos);
+
 Gui::Gui() {
     m_initialized = false;
-    m_screenSize = { 0.0, 0.0 };
-    m_sendOnTouchEvent = 0;
+    m_screenSize = ImVec2(0.0, 0.0);
 
     // We need to clear the pos at first time
     m_needClearMousePos = true;
@@ -37,62 +38,52 @@ void Gui::Init() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
 
-    do {
-        Gui::m_screenSize.x = KittyMemory::callFunction<float>(GTS("_Z15GetScreenSizeXfv"));
-        Gui::m_screenSize.y = KittyMemory::callFunction<float>(GTS("_Z15GetScreenSizeYfv"));
-    } while (Gui::m_screenSize.x == 0.0 || Gui::m_screenSize.y == 0.0);
-
-    io.DisplaySize = ImVec2(Gui::m_screenSize.x, Gui::m_screenSize.y);
+    // Setup display size
+    Gui::m_screenSize.x = KittyMemory::callFunction<float>(GTS("_Z15GetScreenSizeXfv"));
+    Gui::m_screenSize.y = KittyMemory::callFunction<float>(GTS("_Z15GetScreenSizeYfv"));
+    io.DisplaySize = { Gui::m_screenSize.x, Gui::m_screenSize.y };
 
     // Disable loading/saving of .ini file from disk.
-    // FIXME: Consider using LoadIniSettingsFromMemory() / SaveIniSettingsToMemory() to save in appropriate location for Android.
     io.IniFilename = nullptr;
 
     // Setup Dear ImGui style
-    // ImGui::StyleColorsDark(); // it will make style colors classic
-    ImGui::StyleColorsClassic(); // it will make style colors dark
+    SetupImGuiStyle();
 
     // Setup Renderer backends
     ImGui_ImplOpenGL3_Init();
 
     // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    // - Android: The TTF files have to be placed into the assets/ directory (android/app/src/main/assets), we use our GetAssetData() helper to retrieve them.
-
-    // We load the default font with increased size to improve readability on many devices with "high" DPI.
-    // FIXME: Put some effort into DPI awareness.
-    // Important: when calling AddFontFromMemoryTTF(), ownership of font_data is transfered by Dear ImGui by default (deleted is handled by Dear ImGui), unless we set FontDataOwnedByAtlas=false in ImFontConfig
     ImFontConfig font_cfg;
     font_cfg.SizePixels = 22.0f;
     io.Fonts->AddFontDefault(&font_cfg);
-    //void* font_data;
-    //int font_data_size;
-    //ImFont* font;
-    //font_data_size = GetAssetData("Roboto-Medium.ttf", &font_data);
-    //font = io.Fonts->AddFontFromMemoryTTF(font_data, font_data_size, 16.0f);
-    //IM_ASSERT(font != NULL);
-    //font_data_size = GetAssetData("Cousine-Regular.ttf", &font_data);
-    //font = io.Fonts->AddFontFromMemoryTTF(font_data, font_data_size, 15.0f);
-    //IM_ASSERT(font != NULL);
-    //font_data_size = GetAssetData("DroidSans.ttf", &font_data);
-    //font = io.Fonts->AddFontFromMemoryTTF(font_data, font_data_size, 16.0f);
-    //IM_ASSERT(font != NULL);
-    //font_data_size = GetAssetData("ProggyTiny.ttf", &font_data);
-    //font = io.Fonts->AddFontFromMemoryTTF(font_data, font_data_size, 10.0f);
-    //IM_ASSERT(font != NULL);
-    //font_data_size = GetAssetData("ArialUni.ttf", &font_data);
-    //font = io.Fonts->AddFontFromMemoryTTF(font_data, font_data_size, 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
+
+    /*void* font_data = nullptr;
+    int font_data_size = GetAssetData("Arial.ttf", &font_data);
+    ImFont* font = io.Fonts->AddFontFromMemoryTTF(font_data, font_data_size, 16.0f);*/
 
     // Arbitrary scale-up
-    // FIXME: Put some effort into DPI awareness
     ImGui::GetStyle().ScaleAllSizes(3.0f);
 
+    m_scale = { Gui::m_screenSize.x * MULT_X, Gui::m_screenSize.y * MULT_Y };
     m_initialized = true;
+}
+
+void Gui::SetupImGuiStyle() const {
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImGui::StyleColorsClassic();
+
+    style.ScrollbarSize = m_scale.y * 25.0f;
+    style.FramePadding = ImVec2(m_scale.y * 16.0f, 0.0f);
+    style.WindowPadding = ImVec2(0.0f, 0.0f);
+    style.WindowBorderSize = 0.0f;
+    style.ChildBorderSize = 1.0f;
+    style.WindowRounding = 2.75f;
+
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(53.0f / 255.0f, 59.0f / 255.0f, 72.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(45.0f / 255.0f, 49.0f / 255.0f, 58.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_Border] = ImVec4(156.0f / 255.0f, 136.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(156.0f / 255.0f, 136.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+    style.Colors[ImGuiCol_CheckMark] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void Gui::Render() {
@@ -100,19 +91,39 @@ void Gui::Render() {
         return;
     }
 
-    // For imgui checkbox
-    static bool checked = false;
+    static ImGuiWindow* lastImGuiWindow = nullptr;
 
     ImGuiIO& io = ImGui::GetIO();
+    ImGuiStyle& style = ImGui::GetStyle();
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
 
-    // Render game hack imgui window
-    if (g_Game) {
-        g_Game->HackRender();
-    }
+    // Set the next window size.
+    ImVec2 basedWindowSize = { ImGui::CalcTextSize("ABCDEFGHIJKLMNOPQRS").x * 2.0f, 420 };
+    ImGui::SetNextWindowSize(basedWindowSize);
+
+    // Begin the ui window.
+    ImGui::Begin("GTInternal", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+
+    // Make only move if the mouse pos on custom title bar.
+    /*if (GuiUtils::MouseOnImguiTitleBarWindow()) {
+        ImGuiContext& g = *GImGui;
+        g.MovingWindow = nullptr;
+    }*/
+
+    // The main ui render.
+    Ui::MainRender();
+
+    // Get last imgui window.
+    lastImGuiWindow = ImGui::GetCurrentWindow();
+
+    // Scrolling without press ScrollBar.
+    // GuiUtils::ScrollWhenDraggingOnVoid();
+
+    // End the ui window.
+    ImGui::End();
 
     // Rendering
     ImGui::EndFrame();
@@ -120,11 +131,20 @@ void Gui::Render() {
     glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    if (ImGui::IsAnyItemActive()) {
-        m_sendOnTouchEvent = 1;
-    } else {
-        m_sendOnTouchEvent = 2;
-    }
+    // WTF?
+    /*if (lastImGuiWindow) {
+        ImGuiContext& g = *GImGui;
+        if (g.NavWindow != nullptr) {
+            // Auto minimize when click outside imgui.
+            if (!lastImGuiWindow->Collapsed) {
+                lastImGuiWindow->Collapsed = true;
+            }
+        } else {
+            if (lastImGuiWindow->Collapsed) {
+                lastImGuiWindow->Collapsed = false;
+            }
+        }
+    }*/
 
     if (m_needClearMousePos) {
         io.MousePos = ImVec2(-1, -1);
@@ -132,9 +152,8 @@ void Gui::Render() {
     }
 }
 
-void Gui::OnTouchEvent(int type, bool multi, float x, float y) {
+void Gui::OnTouchEvent(int type, __unused bool multi, float x, float y) {
     if (!m_initialized) {
-        m_sendOnTouchEvent = 1;
         return;
     }
 

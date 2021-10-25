@@ -12,6 +12,9 @@
 #include <sys/mman.h>
 #include <vector>
 
+#include "../../utilities/Macros.h"
+#include "../libmem/libmem.h"
+
 #define _SYS_PAGE_SIZE_         (sysconf(_SC_PAGE_SIZE))
 
 #define _PAGE_START_OF_(x)      ((uintptr_t)x & ~(uintptr_t)(_SYS_PAGE_SIZE_ - 1))
@@ -33,8 +36,7 @@ namespace KittyMemory {
         INV_ADDR = 2,
         INV_LEN = 3,
         INV_BUF = 4,
-        INV_PROT = 5,
-        INV_MAP = 6
+        INV_PROT = 5
     } Memory_Status;
 
     struct ProcMap {
@@ -68,12 +70,12 @@ namespace KittyMemory {
     /*
      * Reads an address content into a buffer
      */
-    Memory_Status memRead(void *buffer, const void *addr, size_t len);
+    Memory_Status memRead(void *buffer, void *addr, size_t len);
 
     /*
      * Reads an address content and returns hex string
      */
-    std::string read2HexStr(const void *addr, size_t len);
+    std::string read2HexStr(void *addr, size_t len);
 
     /*
      *
@@ -170,47 +172,6 @@ namespace KittyMemory {
         if (ptr == nullptr)
             return Type();
 
-        int prot = GetMemoryPermission(ptr);
-        if (prot == 0) {
-            return Type();
-        }
-
-        if (!(prot & PROT_EXEC)) {
-            // From SubstrateHook
-            uint32_t *area(reinterpret_cast<uint32_t *>(ptr));
-            uint32_t *arm(area);
-
-            const size_t used(8);
-
-            uint32_t backup[used / sizeof(uint32_t)] = {arm[0], arm[1]};
-
-            size_t length(used);
-            for (unsigned offset(0); offset != used / sizeof(uint32_t); ++offset) {
-                if ((backup[offset] & 0x0c000000) == 0x04000000 && (backup[offset] & 0xf0000000) != 0xf0000000 && (backup[offset] & 0x000f0000) == 0x000f0000) {
-                    if ((backup[offset] & 0x02000000) == 0 ||
-                        (backup[offset] & 0x0000f000 >> 12) != (backup[offset] & 0x0000000f)
-                    ) {
-                        length += 2 * sizeof(uint32_t); // 16
-                    }
-                    else {
-                        length += 4 * sizeof(uint32_t); // 24
-                    }
-                }
-            }
-
-            length += 2 * sizeof(uint32_t); // 20 / 28
-
-            if (mprotect(ptr, length, _PROT_RX_) == -1) {
-                munmap(ptr, length);
-                return Type();
-            }
-
-            /*if (mprotect(ptr, 28, _PROT_RX_) == -1) {
-                munmap(ptr, 28);
-                 return Type();
-            }*/
-        }
-
         return reinterpret_cast<Type(__cdecl *)(Type2...)>(ptr)(args...);
     }
 	
@@ -230,4 +191,137 @@ namespace KittyMemory {
      * Returns final absolute address
      */
     uintptr_t getAbsoluteAddress(ProcMap libMap, uintptr_t relativeAddr);
+
+    /*
+     * FIXME: FIX DONT USE LIBMEM AND FIX NOT THE PATTERN
+     * Scan all address signatures according to the pattern
+     * Returns 0 if none of the signature addresses match the pattern
+     */
+    template <typename T = void*>
+    T patternScan(size_t start, size_t end, std::string pattern, intptr_t offset = 0) {
+        T ret = 0;
+
+        size_t patternSize = pattern.length();
+        const char* data = pattern.data();
+
+        if (start <= 0 || end <= 0 || patternSize < 1) {
+            return ret;
+        }
+
+        /*int prot = GetMemoryPermission(reinterpret_cast<void*>(start));
+        if (!ProtectAddrReal(reinterpret_cast<void*>(start), end - start, _PROT_RWX_)) {
+            return ret;
+        }*/
+
+        lm_page_t oldpage;
+        LM_GetPage(reinterpret_cast<lm_address_t>(start), &oldpage);
+
+        LM_ProtMemory(oldpage.base, oldpage.size,
+                      LM_PROT_XRW, (lm_prot_t *)LM_NULL);
+
+        for (size_t j = 0; j < patternSize; j++) {
+            LOGD("%s", data[j]);
+        }
+
+        bool foundSamePattern = false;
+        for (size_t i = start; i <= end; i++) {
+            for (size_t j = 0; j < patternSize; j++) {
+                if (*((char*)i + j) == data[j] || data[j] == ' ' || data[j] == '?') {
+                    foundSamePattern = true;
+                }
+                else {
+                    foundSamePattern = false;
+                    break;
+                }
+            }
+
+            if (foundSamePattern) {
+                ret = T(i + offset);
+                break;
+            }
+        }
+
+        // ProtectAddrReal(reinterpret_cast<void*>(start), end - start, prot);
+        LM_ProtMemory(oldpage.base, oldpage.size,
+                      oldpage.prot, (lm_prot_t *)LM_NULL);
+        return ret;
+    }
+
+    /*
+     * FIXME: FIX DONT USE LIBMEM AND FIX NOT THE PATTERN
+     * Scan all address signatures according to the pattern
+     * Returns 0 if none of the signature addresses match the pattern
+     */
+    template <typename T = void*>
+    std::vector<T> patternScanAll(size_t start, size_t end, std::string pattern, intptr_t offset = 0) {
+        std::vector<T> ret = {};
+
+        size_t patternSize = pattern.length();
+        const char* data = pattern.data();
+
+        if (start <= 0 || end <= 0 || patternSize < 1) {
+            return ret;
+        }
+
+        /*int prot = GetMemoryPermission(reinterpret_cast<void*>(start));
+        if (!ProtectAddrReal(reinterpret_cast<void*>(start), end - start, _PROT_RWX_)) {
+            return ret;
+        }*/
+
+        lm_page_t oldpage;
+        LM_GetPage(reinterpret_cast<lm_address_t>(start), &oldpage);
+
+        LM_ProtMemory(oldpage.base, oldpage.size,
+                      LM_PROT_XRW, (lm_prot_t *)LM_NULL);
+
+        for (size_t j = 0; j < patternSize; j++) {
+            LOGD("%s", data[j]);
+        }
+
+        bool foundSamePattern = false;
+        for (size_t i = start; i <= end; i++) {
+            for (size_t j = 0; j < patternSize; j++) {
+                if (*((char*)i + j) == data[j] || data[j] == ' ' || data[j] == '?') {
+                    foundSamePattern = true;
+                }
+                else {
+                    foundSamePattern = false;
+                    break;
+                }
+            }
+
+            if (foundSamePattern) {
+                ret.push_back(T(i + offset));
+            }
+        }
+
+        // ProtectAddrReal(reinterpret_cast<void*>(start), end - start, prot);
+        LM_ProtMemory(oldpage.base, oldpage.size,
+                      oldpage.prot, (lm_prot_t *)LM_NULL);
+        return ret;
+    }
+
+    /*
+     * Scan all address signatures according to the pattern
+     * Returns 0 if none of the signature addresses match the pattern
+     */
+    template <typename T = void*>
+    T patternScan(ProcMap map, std::string pattern, intptr_t offset = 0) {
+        size_t start = reinterpret_cast<size_t>(map.startAddr);
+        size_t end = reinterpret_cast<size_t>(map.endAddr);
+
+        return patternScan(start, end, pattern, offset);
+    }
+
+    /*
+     * Scan all address signatures according to the pattern
+     * Returns 0 if none of the signature addresses match the pattern
+     */
+    template <typename T = void*>
+    std::vector<T> patternScanAll(ProcMap map, std::string pattern, intptr_t offset = 0) {
+        size_t start = reinterpret_cast<size_t>(map.startAddr);
+        size_t end = reinterpret_cast<size_t>(map.endAddr);
+
+        return patternScanAll(start, end, pattern, offset);
+    }
 }

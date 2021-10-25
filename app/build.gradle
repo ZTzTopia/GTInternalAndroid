@@ -1,21 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId 'com.ztz.modmenu'
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName '2.9'
         ndk {
-            abiFilters 'armeabi-v7a'
-        }
-        externalNativeBuild {
-            cmake {
-                version '3.18.1'
-                arguments '-GNinja', '-DCMAKE_ANDROID_NDK=C:/Users/Kiky/AppData/Local/Android/Sdk/ndk/21.4.7075529', '-DCMAKE_TOOLCHAIN_FILE=toolchains/android.cmake'
-            }
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
         signingConfig signingConfigs.debug
     }
@@ -34,12 +28,15 @@ android {
     }
 
     externalNativeBuild {
-        cmake {
-            path 'src/main/jni/CMakeLists.txt'
+        ndkBuild {
+            path file("src/main/jni/Android.mk")
         }
     }
 
-    ndkVersion '21.4.7075529'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 //dependencies must be placed below 'android' brackets to get it work on AIDE

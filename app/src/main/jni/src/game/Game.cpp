@@ -4,75 +4,101 @@
 #include "../utilities/Logging.h"
 
 Game::Game() {
-    /*
-        mov r0, #0x0
-        bx lr
-     */
-    // 0000A0E31EFF2FE1 - To return false
+    m_cheatList.clear();
 
-    /*
-        mov r0, #0x1
-        bx lr
-     */
-    // 0100A0E31EFF2FE1 - To return true
-
-    /*
-        mov r0, #0x7f000000
-        bx lr
-     */
-    // 7F04A0E31EFF2FE1 - To return high value
-
-    /*
-        nop
-     */
-    // 00F020E3 - NOP
-
-    // NetMoving::collide() -> WorldTileMap::Collide()
-    stGameMemoryPatch.ModFly = MemoryPatch::nopPatch(GT(0xb5da1c), 1);
-
-    // Tile::IsCheckpoint()
-    stGameMemoryPatch.AntiCheckpoint = MemoryPatch::createWithHex(GT(0x88c4b0), "0000A0E31EFF2FE1");
-
-    stGameHackState.ModFlyChecked = false;
-    stGameHackState.AntiCheckpointChecked = false;
+    m_fpsLimit = 60.0f;
+    m_loginSpoof = true;
+    m_growtopiaVersion = "3.71";
+    m_growtopiaFlags = "??";
+    m_growtopiaServerIp = "??";
 }
 
-void Game::HackRender() {
-    // Begin imgui window
-    ImGui::Begin("Growtopia", nullptr, ImGuiWindowFlags_NoResize);
+void Game::Init() {
+    LOGD("Initializing Game..");
 
-    // Make only move if the mouse pos on title bar
-    if (GuiUtils::MouseOnImguiTitleBarWindow()) {
-        ImGuiContext& g = *GImGui;
-        g.MovingWindow = nullptr;
-    }
+#ifdef __arm__
+    std::string RETFALSE = "0000A0E31EFF2FE1";
+    std::string RETTRUE = "0100A0E31EFF2FE1";
+    std::string RETFLOAT1 = "FE05A0E31EFF2FE1";
+#elif __aarch64__
+    std::string RETFALSE = "000080D2C0035FD6";
+    std::string RETTRUE = "200080D2C0035FD6";
+    std::string RETFLOAT1 = "00F0A7D2C0035FD6";
+#endif
 
-    // Checkbox
-    ImGui::Checkbox("Mod Fly", &stGameHackState.ModFlyChecked);
-    ModFly(stGameHackState.ModFlyChecked);
+    struct stCheatList cheatList = {};
+    cheatList.cheatName = OBFUSCATE("Mod Fly");
+#ifdef __arm__
+    cheatList.cheatAddr = GT("0xb5da1c"); // NetMoving::collide() -> WorldTileMap::Collide()
+#elif __aarch64__
+    cheatList.cheatAddr = GT("0xd022dc"); // NetMoving::collide() -> WorldTileMap::Collide()
+#endif
+    cheatList.cheatMemPatch = MemoryPatch::nopPatch(reinterpret_cast<uintptr_t>(cheatList.cheatAddr), 1);
+    m_cheatList.push_back(cheatList);
 
-    ImGui::Checkbox("Anti Checkpoint", &stGameHackState.AntiCheckpointChecked);
-    AntiCheckpoint(stGameHackState.AntiCheckpointChecked);
+    cheatList = {};
+    cheatList.cheatName = "Anti Checkpoint";
+    cheatList.cheatAddr = GTS("_ZN4Tile12IsCheckpointEv"); // Tile::IsCheckpoint()
+    cheatList.cheatHex = RETFALSE;
+    cheatList.cheatMemPatch = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(cheatList.cheatAddr), cheatList.cheatHex);
+    m_cheatList.push_back(cheatList);
 
-    // Scrolling without press ScrollBar
-    GuiUtils::ScrollWhenDraggingOnVoid();
+    cheatList = {};
+    cheatList.cheatName = "Anti Portal";
+    cheatList.cheatAddr = GTS("_ZN9NetAvatar9OnUseDoorEP4Tileb"); // NetAvatar::OnUseDoor()
+    cheatList.cheatHex = RETFALSE;
+    cheatList.cheatMemPatch = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(cheatList.cheatAddr), cheatList.cheatHex);
+    m_cheatList.push_back(cheatList);
 
-    // End imgui window
-    ImGui::End();
+    cheatList = {};
+    cheatList.cheatName = "Anti Punch";
+    cheatList.cheatAddr = GTS("_ZN9NetAvatar9OnPunchedE7CL_Vec2IfEPS_"); // NetAvatar::OnPunched()
+    cheatList.cheatHex = RETFALSE;
+    cheatList.cheatMemPatch = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(cheatList.cheatAddr), cheatList.cheatHex);
+    m_cheatList.push_back(cheatList);
+
+    cheatList = {};
+    cheatList.cheatName = "Fast Fall";
+    cheatList.cheatAddr = GTS("_ZN9NetMoving7collideESsffP11CollideInfoib"); // NetMoving::collide()
+    cheatList.cheatHex = RETFALSE;
+    cheatList.cheatMemPatch = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(cheatList.cheatAddr), cheatList.cheatHex);
+    m_cheatList.push_back(cheatList);
+
+    cheatList = {};
+    cheatList.cheatName = "See Ghost";
+    cheatList.cheatAddr = GTS("_Z12CanSeeGhostsi"); // CanSeeGhosts()
+    cheatList.cheatHex = RETTRUE;
+    cheatList.cheatMemPatch = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(cheatList.cheatAddr), cheatList.cheatHex);
+    m_cheatList.push_back(cheatList);
+
+    cheatList = {};
+    cheatList.cheatName = "See Fruits";
+    cheatList.cheatAddr = GTS("_ZN4Tile28GetFruitBloomProgressPercentEv"); // Tile::GetFruitBloomProgressPercent()
+    cheatList.cheatHex = RETFLOAT1;
+    cheatList.cheatMemPatch = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(cheatList.cheatAddr), cheatList.cheatHex);
+    m_cheatList.push_back(cheatList);
+
+    cheatList = {};
+    cheatList.cheatName = "Anti Bounce";
+    cheatList.cheatAddr = GTS("_ZN9NetAvatar8OnDamageEv"); // NetAvatar::OnDamage()
+    cheatList.cheatHex = RETFALSE;
+    cheatList.cheatMemPatch = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(cheatList.cheatAddr), cheatList.cheatHex);
+    m_cheatList.push_back(cheatList);
+
+    cheatList = {};
+    cheatList.cheatName = "Night Vision";
+    cheatList.cheatAddr = GTS("_ZN11PlayerItems13NightVisionOnEv"); // PlayerItems::NightVisionOn()
+    cheatList.cheatHex = RETTRUE;
+    cheatList.cheatMemPatch = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(cheatList.cheatAddr), cheatList.cheatHex);
+    m_cheatList.push_back(cheatList);
 }
 
-void Game::ModFly(bool checked) {
-    static bool old = false;
-    if (old != checked) {
-        checked ? stGameMemoryPatch.ModFly.Modify() : stGameMemoryPatch.ModFly.Restore();
-        old = checked;
+bool Game::GetCheatState(const std::string& cheatName) {
+    for (const stCheatList& cheatList : m_cheatList) {
+        if (cheatList.cheatName.find(cheatName) != -1) {
+            return cheatList.cheatState;
+        }
     }
-}
 
-void Game::AntiCheckpoint(bool checked) {
-    static bool old = false;
-    if (old != checked) {
-        checked ? stGameMemoryPatch.AntiCheckpoint.Modify() : stGameMemoryPatch.AntiCheckpoint.Restore();
-        old = checked;
-    }
+    return false;
 }

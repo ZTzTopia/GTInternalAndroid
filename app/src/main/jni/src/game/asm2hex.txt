@@ -1,0 +1,32 @@
+ARM32:
+mov r0, #0x0
+bx lr
+0000A0E31EFF2FE1 - To return false
+
+mov r0, #0x1
+bx lr
+0100A0E31EFF2FE1 - To return true
+
+nop
+00F020E3 - NOP
+
+mov x0, #0x3f800000
+bx lr
+FE05A0E31EFF2FE1 - To return float 1.0f
+
+
+ARM64:
+mov x0, #0x0
+ret
+000080D2C0035FD6 - To return false
+
+mov x0, #0x1
+ret
+200080D2C0035FD6 - To return true
+
+nop
+1F2003D5 - NOP
+
+mov r0, #0x3f800000
+ret
+00F0A7D2C0035FD6 - To return float 1.0f

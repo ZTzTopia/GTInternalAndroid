@@ -17,7 +17,7 @@ The following dependencies are required to build the library from source.
 For AIDE users (I'm not sure if this works 100%).
 - [AIDE CMods](https://www.mediafire.com/file/ihf3so9r9rc6yke/AIDE-_IDE_v3.2.210316__Unlocked.apk/file).
 - [NDK AIDE for arm32](https://www.mediafire.com/file/62l4gcxqsqtxy20/ndk_arm.tar.gz/file).
-- [NDK AIDE for arm64/aarch64](https://www.mediafire.com/file/w56tbt9pmqxzmpu/ndk_arm64.tar.gz/file).
+- [NDK AIDE for arm64](https://www.mediafire.com/file/w56tbt9pmqxzmpu/ndk_arm64.tar.gz/file).
 - APK Editor.
 
 There are many tutorials for installing on youtube, Attention if your android doesn't support arm then it won't work. one of them [AIDE CMods tutorial](https://youtu.be/VYvKEFHSgkg)
@@ -46,7 +46,7 @@ cmake --build .
 
 I highly recommend using `APK Easy Tools` but if you can't use it you can use the `APK Editor` on Android. Because `APK Editor` most likely there will be an error when recompiling the smali folder.
 
-Or you can get growtopia with edited: [GrowtopiaLatestEdited](https://link-to.net/196297/growtopialatestedited)
+Or you can get growtopia with edited: [GrowtopiaLatestEdited](https://bit.ly/3lHn4Vv)
 
 ### 2. Add your library to apk
 
@@ -75,3 +75,11 @@ If you don't see `smali` folder in APK Editor:
 Now compile and sign the apk, and install it on your device. Congrats. You have successfully implemented a mod menu.
 
 #### Some parts of this content from [LGLTeam Mod Menu](https://github.com/LGLTeam/Android-Mod-Menu)
+
+## Thanks to
+- [GuckTubeYT](https://github.com/GuckTubeYT)
+- [adhptrh](https://github.com/adhptrh)
+
+## Credits
+- [Kitty Memory](https://github.com/MJx0/KittyMemory)
+- [Substrate](http://www.cydiasubstrate.com/)

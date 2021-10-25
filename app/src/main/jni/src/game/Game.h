@@ -1,24 +1,20 @@
 #pragma once
 #include "../main.h"
+#include "Common.h"
 
 class Game {
 public:
     Game();
     ~Game() {};
 
-    void HackRender();
+    void Init();
+    bool GetCheatState(const std::string& cheatName);
 
-    void ModFly(bool checked);
-    void AntiCheckpoint(bool checked);
-
-private:
-    struct {
-        MemoryPatch ModFly;
-        MemoryPatch AntiCheckpoint;
-    } m_gameHack;
-
-    struct _stGameHackState {
-        bool ModFlyChecked;
-        bool AntiCheckpointChecked;
-    } m_gameHackState;
+public:
+    float m_fpsLimit;
+    __unused bool m_loginSpoof;
+    __unused std::string m_growtopiaVersion;
+    __unused std::string m_growtopiaFlags;
+    std::string m_growtopiaServerIp;
+    std::vector<stCheatList> m_cheatList;
 };

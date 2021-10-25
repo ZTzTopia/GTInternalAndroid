@@ -50,7 +50,7 @@ public:
     static MemoryPatch createWithHex(uintptr_t absolute_address, std::string hex);
 
     /*
-     *
+     * NOOOOOOOOOP PATCH OK?
      */
     static MemoryPatch nopPatch(const char *libraryName, uintptr_t address,
                                 size_t patch_size, bool useMapCache=true);

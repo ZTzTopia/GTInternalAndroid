@@ -3,71 +3,127 @@
 #include <dlfcn.h>
 #include <pthread.h>
 
+#include "Hook.h"
 #include "../main.h"
+#include "Common.h"
+#include "Game.h"
 #include "../gui/Gui.h"
-#include "../utilities/Logging.h"
 
-static struct _stOnTouchEvent {
-    void* ontouch_a1;
-    void* ontouch_a2;
-    int ontouch_type;
-    float ontouch_x;
-    float ontouch_y;
-    int ontouch_multi;
-} stOnTouchEvent;
+extern Gui *g_Gui;
+extern Game *g_Game;
 
-extern Gui* g_Gui;
-
-void InitHook();
-
-void (*BaseApp_draw)(void* thiz);
-void BaseApp_draw_hook(void* thiz) {
-    BaseApp_draw(thiz);
-    DoMainPulse();
+void SendOnTouchEvent(bool sendTruePos) {
+    if (sendTruePos) {
+        AppOnTouch(Hook::g_onTouchEvent->ontouchThiz, OnTouchEvent.ontouchObject, OnTouchEvent.ontouchType,
+                   g_onTouchEvent->ontouchX, OnTouchEvent.ontouchY, OnTouchEvent.ontouchMulti);
+    } else {
+        AppOnTouch(OnTouchEvent.ontouchThiz, OnTouchEvent.ontouchObject, 1, -1.0f, -1.0f,
+                   OnTouchEvent.ontouchMulti);
+    }
 }
 
-void (*AppOnTouch)(void* a1, void* a2, int a3, float a4, float a5, int a6);
-void* ontouch_thread(void*) {
-    do {
-        sleep(0);
-    } while (g_Gui->m_sendOnTouchEvent == 0);
+void (*BaseApp_Draw)(void *thiz);
+void BaseApp_Draw_hook(void *thiz) {
+    BaseApp_Draw(thiz);
 
-    if (g_Gui->m_sendOnTouchEvent == 2) {
-        AppOnTouch(stOnTouchEvent.ontouch_a1, stOnTouchEvent.ontouch_a2, stOnTouchEvent.ontouch_type,
-                   stOnTouchEvent.ontouch_x, stOnTouchEvent.ontouch_y, stOnTouchEvent.ontouch_multi);
+    // Initialize stuff
+    static bool initialized = false;
+    if (!initialized) {
+        // Initialize Gui.
+        g_Gui = new Gui;
+        g_Gui->Init();
+
+        // Initialize Game.
+        g_Game = new Game;
+        g_Game->Init();
+
+        initialized = true;
+    } else {
+        // Render the gui (ImGui)
+        if (g_Gui) {
+            g_Gui->Render();
+        }
+
+        // Send on touch event.
+        ImGuiIO& io = ImGui::GetIO();
+        SendOnTouchEvent(!io.WantCaptureMouse);
     }
-    else if (g_Gui->m_sendOnTouchEvent == 1) {
-        // Type: Pop, X: 0.0, Y: 0.0, Multi: 0
-        AppOnTouch(stOnTouchEvent.ontouch_a1, stOnTouchEvent.ontouch_a2, 1, 0.0, 0.0, 0);
-    }
-
-    g_Gui->m_sendOnTouchEvent = 0;
-
-    // Now we can exit the thread
-    pthread_exit(nullptr);
 }
 
-void AppOnTouch_hook(void* a1, void* a2, int type, float x, float y, int multi) {
+void (*BaseApp_SetFPSLimit)(void *thiz, float fps);
+void BaseApp_SetFPSLimit_hook(void *thiz, float fps) {
+    if (g_Game) {
+        // Set custom fps limit.
+        BaseApp_SetFPSLimit(thiz, g_Game->m_fpsLimit);
+    } else {
+        BaseApp_SetFPSLimit(thiz, fps);
+    }
+}
+
+void (*AppOnTouch)(void *a1, void *a2, int type, float x, float y, int multi);
+void AppOnTouch_hook(void *thiz, void *object, int type, float x, float y, int multi) {
     if (g_Gui && (x > 0.0 || y > 0.0)) {
         g_Gui->OnTouchEvent(type, multi, x, y);
     }
 
-    stOnTouchEvent.ontouch_a1 = a1;
-    stOnTouchEvent.ontouch_a2 = a2;
-    stOnTouchEvent.ontouch_type = type;
-    stOnTouchEvent.ontouch_x = x;
-    stOnTouchEvent.ontouch_y = y;
-    stOnTouchEvent.ontouch_multi = multi;
-    
-    // Create a new thread because we dont want do while loop make ontouch thread stuck
-    pthread_t ptid;
-    pthread_create(&ptid, nullptr, ontouch_thread, nullptr);
+    // Send it later after checking any item imgui active.
+    memset(&OnTouchEvent, 0, sizeof(OnTouchEvent));
+    OnTouchEvent.ontouchThiz = thiz;
+    OnTouchEvent.ontouchObject = object;
+    OnTouchEvent.ontouchType = type;
+    OnTouchEvent.ontouchX = x;
+    OnTouchEvent.ontouchY = y;
+    OnTouchEvent.ontouchMulti = multi;
 }
 
-void InitHook() {
+void (*NetHTTP_Update)(NetHTTP *thiz);
+void NetHTTP_Update_hook(NetHTTP *thiz) {
+    // Check if the custom server ip not "??".
+    if (g_Game && g_Game->m_growtopiaServerIp.find("??") == -1) {
+        // Check if the NetHTTP server name is growtopia1.com or growtopia2.com.
+        if (thiz->serverName.find("growtopia1.com") != -1 ||
+            thiz->serverName.find("growtopia2.com") != -1
+                ) {
+            thiz->serverName = g_Game->m_growtopiaServerIp;
+        }
+    }
+
+    NetHTTP_Update(thiz);
+}
+
+void (*SendPacket)(int type, std::string const &data, ENetPeer *peer);
+void SendPacket_hook(int type, std::string const &data, ENetPeer *peer) {
+    //LOGDD("SendPacket:\ntype: %d\ndata: %s\npeer: 0x%X", type, data.c_str(), peer);
+    /*if (g_Game->m_loginSpoof && data.find("game_version|") != -1) {
+        Utils::Split split = Utils::Split::Parse(data, "|");
+
+        if (split.Get("game_version").find(g_Game->m_growtopiaVersion) == -1) {
+            split.Set("game_version", g_Game->m_growtopiaVersion);
+        }
+
+        data = split.Serialize("|");
+    }*/
+
+    SendPacket(type, data, peer);
+}
+
+void Hook::Init() {
     LOGD("Initializing Hook..");
 
-    // Hard to explain btw :D
-    MSHookFunction(GTS("_ZN7BaseApp4DrawEv"), (void*)BaseApp_draw_hook, (void**)&BaseApp_draw);
-    MSHookFunction(GTS("_Z10AppOnTouchP7_JNIEnvP8_jobjectiffi"), (void*)AppOnTouch_hook, (void**)&AppOnTouch);
+    // BaseApp::Draw()
+    HOOK(GTS("_ZN7BaseApp4DrawEv"), (void *)BaseApp_Draw_hook, (void **)&BaseApp_Draw);
+
+    // BaseApp::SetFPSLimit()
+//    HOOK(GTS("_ZN7BaseApp11SetFPSLimitEf"), (void *) BaseApp_SetFPSLimit_hook,
+//         (void **) &BaseApp_SetFPSLimit);
+
+    // AppOnTouch()
+    HOOK(GTS("_Z10AppOnTouchP7_JNIEnvP8_jobjectiffi"), (void *)AppOnTouch_hook, (void **)&AppOnTouch);
+
+    // NetHTTP::Update()
+//    HOOK(GTS("_ZN7NetHTTP6UpdateEv"), (void *) NetHTTP_Update_hook, (void **) &NetHTTP_Update);
+
+    // SendPacket()
+//    HOOK(GTS("_Z10SendPacket15eNetMessageTypeRKSsP9_ENetPeer"), (void *) SendPacket_hook,
+//         (void **) &SendPacket);
 }
