@@ -1,10 +1,12 @@
 #pragma once
 #include "Common.h"
 
-class Hook {
-public:
-    static void Init();
+namespace Game {
+    class Hook {
+    public:
+        static void Init();
 
-public:
-    static OnTouchEvent* g_onTouchEvent;
-};
+    public:
+        static OnTouchEvent *g_onTouchEvent;
+    };
+}

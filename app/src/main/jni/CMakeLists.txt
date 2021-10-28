@@ -36,6 +36,7 @@ add_library(${PROJECT_NAME} SHARED
         ${FILE_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/enet/include)
 

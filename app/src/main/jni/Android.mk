@@ -17,7 +17,8 @@ LOCAL_CFLAGS += -fno-rtti -fno-exceptions -fpermissive
 LOCAL_CPPFLAGS += -Wno-error=format-security -fpermissive -w -Werror -s -std=c++14
 LOCAL_CPPFLAGS += -fno-rtti -fno-exceptions -fms-extensions -Wno-error=c++11-narrowing
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/vendor/imgui
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/src
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/vendor/imgui
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/vendor/enet/include
 
 FILE_LIST := $(wildcard $(LOCAL_PATH)/src/*.c*)

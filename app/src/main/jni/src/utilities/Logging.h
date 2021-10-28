@@ -1,6 +1,7 @@
 #pragma once
 
-class Logging {
-public:
-    void Log();
+namespace Utilities {
+    namespace Logging {
+        void Log();
+    }
 }

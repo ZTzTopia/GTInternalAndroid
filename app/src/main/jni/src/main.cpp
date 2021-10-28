@@ -20,19 +20,16 @@
 #include "utilities/Utils.h"
 
 void *g_GrowtopiaHandle = nullptr;
-ProcMap g_GrowtopiaMap = {};
-
-Game *g_Game = nullptr;
-Gui *g_Gui = nullptr;
+KittyMemory::ProcMap g_GrowtopiaMap = {};
 
 void *main_thread(void *) {
     sleep(1);
 
-    CrashDump::Init();
+    Utilities::CrashDump::Init();
 
     // Initialize random seed for Random and RandomFloat. We need to give time for the
     // seed random generator to work.
-    Utils::RandomSeed();
+    Utilities::RandomSeed();
 
     do {
         g_GrowtopiaMap = KittyMemory::getLibraryMap("libgrowtopia.so");
