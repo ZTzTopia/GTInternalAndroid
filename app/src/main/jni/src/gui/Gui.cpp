@@ -1,8 +1,7 @@
 #include "Gui.h"
-#include "Utils.h"
 #include "Ui.h"
-#include "../game/Game.h"
-#include "../main.h"
+#include "game/Game.h"
+#include "utilities/Macros.h"
 
 #define MULT_X	0.00052083333f	// 1/1920
 #define MULT_Y	0.00092592592f 	// 1/1080
@@ -41,7 +40,7 @@ void Gui::Gui::Init() {
     // Setup display size
     Gui::m_screenSize.x = KittyMemory::callFunction<float>(GTS("_Z15GetScreenSizeXfv"));
     Gui::m_screenSize.y = KittyMemory::callFunction<float>(GTS("_Z15GetScreenSizeYfv"));
-    io.DisplaySize = { Gui::m_screenSize.x, Gui::m_screenSize.y };
+    io.DisplaySize = ImVec2(Gui::m_screenSize.x, Gui::m_screenSize.y);
 
     // Disable loading/saving of .ini file from disk.
     io.IniFilename = nullptr;

@@ -1,6 +1,5 @@
 #include "Utils.h"
 #include "Gui.h"
-#include "../utilities/Logging.h"
 
 bool Gui::Utils::IsAnyScrollBarActive() {
     ImGuiWindow *window = ImGui::GetCurrentWindow();

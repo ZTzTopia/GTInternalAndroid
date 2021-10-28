@@ -29,7 +29,13 @@
 
 #ifndef RANDUTILS_HPP
 #define RANDUTILS_HPP 1
-
+#include <jni.h>
+#include <android/log.h>
+#define TAG "ModMenu"
+#define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG,   TAG, __VA_ARGS__))
+#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR,   TAG, __VA_ARGS__))
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO,    TAG, __VA_ARGS__))
+#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARNING, TAG, __VA_ARGS__))
 /*
  * This header includes three class templates that can help make C++11
  * random number generation easier to use.
@@ -103,23 +109,80 @@
 #include <algorithm>
 
 // Ugly platform-specific code for auto_seeded
+// https://github.com/MariaDB/server/blob/10.7/include/my_rdtsc.h
 
-#if !defined(RANDUTILS_CPU_ENTROPY) && defined(__has_builtin)
-#if __has_builtin(__builtin_readcyclecounter)
-        #define RANDUTILS_CPU_ENTROPY __builtin_readcyclecounter()
-    #endif
+#if _WIN32
+    #include <intrin.h>
+#elif defined(__i386__) || defined(__x86_64__)
+    #include <x86intrin.h>
+#elif defined(__INTEL_COMPILER) && defined(__ia64__) && defined(HAVE_IA64INTRIN_H)
+    #include <ia64intrin.h>
+#elif defined(HAVE_SYS_TIMES_H) && defined(HAVE_GETHRTIME)
+    #include <sys/times.h>
 #endif
+
+inline uint64_t okkkkkkkkkkkkkkkkkkkk000() {
+#if defined(__GNUC__) && defined(__ia64__)
+    {
+        uint64_t result;
+        __asm __volatile__ ("mov %0=ar.itc" : "=r" (result));
+        return result;
+    }
+#elif defined(__GNUC__) && defined(__sparcv9) && defined(_LP64)
+    {
+        uint64_t result;
+        __asm __volatile__ ("rd %%tick,%0" : "=r" (result));
+        return result;
+    }
+#elif defined(__GNUC__) && defined(__sparc__) && !defined(_LP64)
+    {
+        union {
+            uint64_t wholeresult;
+            struct {
+                uint32_t high;
+                uint32_t low;
+            }       splitresult;
+        } result;
+        __asm __volatile__ ("rd %%tick,%1; srlx %1,32,%0" : "=r" (result.splitresult.high), "=r" (result.splitresult.low));
+        return result.wholeresult;
+    }
+#elif defined(__GNUC__) && defined(__s390__)
+    /* covers both s390 and s390x */
+    {
+        uint64_t result;
+        __asm__ __volatile__ ("stck %0" : "=Q" (result) : : "cc");
+        return result;
+    }
+#elif defined(__GNUC__) && defined(__aarch64__)
+    {
+        uint64_t result;
+        __asm __volatile("mrs	%0, CNTVCT_EL0" : "=&r" (result));
+        return result;
+    }
+#endif
+
+    return 0;
+}
+
 #if !defined(RANDUTILS_CPU_ENTROPY)
-#if __i386__
-#if __GNUC__
-            #define RANDUTILS_CPU_ENTROPY __builtin_ia32_rdtsc()
-        #else
-            #include <immintrin.h>
-            #define RANDUTILS_CPU_ENTROPY __rdtsc()
+    #if defined(__has_builtin)
+        #if __has_builtin(__builtin_readcyclecounter) && !defined(__aarch64__)
+            #define RANDUTILS_CPU_ENTROPY __builtin_readcyclecounter()
         #endif
-#else
-#define RANDUTILS_CPU_ENTROPY 0
-#endif
+    #endif
+    #if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
+        #define RANDUTILS_CPU_ENTROPY __rdtsc()
+    #elif _M_ARM64
+        #define RANDUTILS_CPU_ENTROPY _ReadStatusReg(ARM64_CNTVCT);
+    #elif defined(__INTEL_COMPILER) && defined(__ia64__) && defined(HAVE_IA64INTRIN_H)
+        #define RANDUTILS_CPU_ENTROPY (uint64_t) __getReg(_IA64_REG_AR_ITC); /* (3116) */
+    #elif defined(__GNUC__) && defined(__powerpc__)
+        #define RANDUTILS_CPU_ENTROPY  __builtin_ppc_get_timebase();
+    #elif defined(HAVE_SYS_TIMES_H) && defined(HAVE_GETHRTIME)
+        #define RANDUTILS_CPU_ENTROPY (uint64_t) gethrtime()
+    #else
+        #define RANDUTILS_CPU_ENTROPY okkkkkkkkkkkkkkkkkkkk000()
+    #endif
 #endif
 
 #if defined(RANDUTILS_GETPID)

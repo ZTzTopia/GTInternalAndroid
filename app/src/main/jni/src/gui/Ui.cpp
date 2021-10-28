@@ -1,8 +1,6 @@
 #include "Ui.h"
 #include "Gui.h"
-#include "Utils.h"
-#include "../game/Game.h"
-#include "../game/Common.h"
+#include "game/Game.h"
 
 extern Game::Game* g_Game;
 

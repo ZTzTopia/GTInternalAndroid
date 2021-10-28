@@ -5,7 +5,6 @@
 //
 
 #include "MemoryPatch.hpp"
-#include "../../utilities/Macros.h"
 
 MemoryPatch::MemoryPatch() {
     _address = 0;

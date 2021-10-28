@@ -1,15 +1,20 @@
 #pragma once
 #include <jni.h>
 #include <android/log.h>
+#include <dlfcn.h>
 
 #include "Utils.h"
 #include "include/obfuscate.h"
+#include "include/KittyMemory/KittyMemory.hpp"
 #if defined(__arm__)
 #include "include/Substrate/SubstrateHook.h"
 #include "include/Substrate/CydiaSubstrate.h"
 #else
 #include "include/And64InlineHook/And64InlineHook.hpp"
 #endif
+
+extern KittyMemory::ProcMap g_GrowtopiaMap;
+extern void* g_GrowtopiaHandle;
 
 #define TAG "ModMenu"
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG,   TAG, __VA_ARGS__))

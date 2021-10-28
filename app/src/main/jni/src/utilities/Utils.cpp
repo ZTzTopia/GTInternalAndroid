@@ -2,14 +2,13 @@
 #include <random>
 
 #include "Utils.h"
-#include "Logging.h"
-#include "../include/obfuscate.h"
-#include "../include/randutils.hpp"
+#include "include/obfuscate.h"
+#include "include/randutils.hpp"
 
 std::mt19937 g_generator; // NOLINT(cert-msc51-cpp)
 
 void Utilities::Utils::RandomSeed() {
-    g_generator.seed(randutils::auto_seed_128{}.base());
+    g_generator.seed(randutils::auto_seed_256{}.base());
 }
 
 int Utilities::Utils::Random(int min, int max) {

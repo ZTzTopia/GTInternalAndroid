@@ -12,9 +12,6 @@
 #include <sys/mman.h>
 #include <vector>
 
-#include "../../utilities/Macros.h"
-#include "../libmem/libmem.h"
-
 #define _SYS_PAGE_SIZE_         (sysconf(_SC_PAGE_SIZE))
 
 #define _PAGE_START_OF_(x)      ((uintptr_t)x & ~(uintptr_t)(_SYS_PAGE_SIZE_ - 1))
@@ -193,111 +190,47 @@ namespace KittyMemory {
     uintptr_t getAbsoluteAddress(ProcMap libMap, uintptr_t relativeAddr);
 
     /*
-     * FIXME: FIX DONT USE LIBMEM AND FIX NOT THE PATTERN
-     * Scan all address signatures according to the pattern
-     * Returns 0 if none of the signature addresses match the pattern
+     * Comparing data with pattern
+     * Returns false if data not match the pattern
      */
-    template <typename T = void*>
-    T patternScan(size_t start, size_t end, std::string pattern, intptr_t offset = 0) {
-        T ret = 0;
-
-        size_t patternSize = pattern.length();
-        const char* data = pattern.data();
-
-        if (start <= 0 || end <= 0 || patternSize < 1) {
-            return ret;
-        }
-
-        /*int prot = GetMemoryPermission(reinterpret_cast<void*>(start));
-        if (!ProtectAddrReal(reinterpret_cast<void*>(start), end - start, _PROT_RWX_)) {
-            return ret;
-        }*/
-
-        lm_page_t oldpage;
-        LM_GetPage(reinterpret_cast<lm_address_t>(start), &oldpage);
-
-        LM_ProtMemory(oldpage.base, oldpage.size,
-                      LM_PROT_XRW, (lm_prot_t *)LM_NULL);
-
-        for (size_t j = 0; j < patternSize; j++) {
-            LOGD("%s", data[j]);
-        }
-
-        bool foundSamePattern = false;
-        for (size_t i = start; i <= end; i++) {
-            for (size_t j = 0; j < patternSize; j++) {
-                if (*((char*)i + j) == data[j] || data[j] == ' ' || data[j] == '?') {
-                    foundSamePattern = true;
-                }
-                else {
-                    foundSamePattern = false;
-                    break;
-                }
+    /*bool matchPattern(const char* data, const char* pattern) {
+        bool found = false;
+        for (; *data; ++data, ++pattern) {
+            if (*data == *pattern || *pattern == '?') {
+                found = true;
             }
-
-            if (foundSamePattern) {
-                ret = T(i + offset);
+            else {
+                found = false;
                 break;
             }
         }
 
-        // ProtectAddrReal(reinterpret_cast<void*>(start), end - start, prot);
-        LM_ProtMemory(oldpage.base, oldpage.size,
-                      oldpage.prot, (lm_prot_t *)LM_NULL);
-        return ret;
-    }
+        return found;
+    }*/
 
     /*
-     * FIXME: FIX DONT USE LIBMEM AND FIX NOT THE PATTERN
      * Scan all address signatures according to the pattern
      * Returns 0 if none of the signature addresses match the pattern
      */
-    template <typename T = void*>
-    std::vector<T> patternScanAll(size_t start, size_t end, std::string pattern, intptr_t offset = 0) {
-        std::vector<T> ret = {};
-
-        size_t patternSize = pattern.length();
-        const char* data = pattern.data();
-
-        if (start <= 0 || end <= 0 || patternSize < 1) {
-            return ret;
-        }
+    template <typename Type = void*>
+    Type patternScan(const size_t start, const size_t end, const char* pattern, const intptr_t offset = 0) {
+        Type ret = Type(0x0);
 
         /*int prot = GetMemoryPermission(reinterpret_cast<void*>(start));
-        if (!ProtectAddrReal(reinterpret_cast<void*>(start), end - start, _PROT_RWX_)) {
+        if (!ProtectAddr(reinterpret_cast<void*>(start), end - start, _PROT_RWX_)) {
             return ret;
         }*/
 
-        lm_page_t oldpage;
-        LM_GetPage(reinterpret_cast<lm_address_t>(start), &oldpage);
-
-        LM_ProtMemory(oldpage.base, oldpage.size,
-                      LM_PROT_XRW, (lm_prot_t *)LM_NULL);
-
-        for (size_t j = 0; j < patternSize; j++) {
-            LOGD("%s", data[j]);
-        }
-
-        bool foundSamePattern = false;
-        for (size_t i = start; i <= end; i++) {
-            for (size_t j = 0; j < patternSize; j++) {
-                if (*((char*)i + j) == data[j] || data[j] == ' ' || data[j] == '?') {
-                    foundSamePattern = true;
-                }
-                else {
-                    foundSamePattern = false;
-                    break;
+        /*if (start > 0 && end > 0 && pattern) {
+            for (size_t i = 0; i <= end - start; i++) {
+                if (matchPattern(reinterpret_cast<char* >(start + i), pattern)) {
+                    ret = Type(i + offset);
                 }
             }
-
-            if (foundSamePattern) {
-                ret.push_back(T(i + offset));
-            }
-        }
+        }*/
 
         // ProtectAddrReal(reinterpret_cast<void*>(start), end - start, prot);
-        LM_ProtMemory(oldpage.base, oldpage.size,
-                      oldpage.prot, (lm_prot_t *)LM_NULL);
+
         return ret;
     }
 
@@ -305,23 +238,11 @@ namespace KittyMemory {
      * Scan all address signatures according to the pattern
      * Returns 0 if none of the signature addresses match the pattern
      */
-    template <typename T = void*>
-    T patternScan(ProcMap map, std::string pattern, intptr_t offset = 0) {
+    template <typename Type = void*>
+    Type patternScan(const ProcMap map, const char* pattern, const intptr_t offset = 0) {
         size_t start = reinterpret_cast<size_t>(map.startAddr);
         size_t end = reinterpret_cast<size_t>(map.endAddr);
 
-        return patternScan(start, end, pattern, offset);
-    }
-
-    /*
-     * Scan all address signatures according to the pattern
-     * Returns 0 if none of the signature addresses match the pattern
-     */
-    template <typename T = void*>
-    std::vector<T> patternScanAll(ProcMap map, std::string pattern, intptr_t offset = 0) {
-        size_t start = reinterpret_cast<size_t>(map.startAddr);
-        size_t end = reinterpret_cast<size_t>(map.endAddr);
-
-        return patternScanAll(start, end, pattern, offset);
+        return patternScan<Type>(start, end, pattern, offset);
     }
 }

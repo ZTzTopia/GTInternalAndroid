@@ -15,17 +15,17 @@ The following dependencies are required to build the library from source.
 - Any text editor. We use [Notepad++](https://notepad-plus-plus.org/).
 
 For AIDE users (I'm not sure if this works 100%).
-- [AIDE CMods](https://www.mediafire.com/file/ihf3so9r9rc6yke/AIDE-_IDE_v3.2.210316__Unlocked.apk/file).
+- [AIDE CMods](https://secufiles.com/nE9J/AIDE_CMODs_3.2.200108.apk).
 - [NDK AIDE for arm32](https://www.mediafire.com/file/62l4gcxqsqtxy20/ndk_arm.tar.gz/file).
 - [NDK AIDE for arm64](https://www.mediafire.com/file/w56tbt9pmqxzmpu/ndk_arm64.tar.gz/file).
-- APK Editor.
+- [APK Tool M](https://maximoff.su/apktool)
 
 There are many tutorials for installing on youtube, Attention if your android doesn't support arm then it won't work. one of them [AIDE CMods tutorial](https://youtu.be/VYvKEFHSgkg)
 
 ## Building the source
 `ndk-build`:
 ```shell
-git clone https://github.com/ZTzTopia/GrowtopiaImGui.git
+git clone https://github.com/ZTzTopia/GTInternalAndroid
 cd GrowtopiaImGui
 ndk-build
 ```
@@ -42,44 +42,93 @@ cmake --build .
 ```
 
 ## Inject to growtopia
-### 1. Decompile growtopia apk
+<details>
+  <summary markdown="span">Android</summary>
 
-I highly recommend using `APK Easy Tools` but if you can't use it you can use the `APK Editor` on Android. Because `APK Editor` most likely there will be an error when recompiling the smali folder.
+I highly recommend using [APK Tool M](https://maximoff.su/apktool) to decompile the growtopia apk. Or you can get growtopia with edited: [Growtopia Folder](https://bit.ly/2ZanMBy), so you don't need to do the tutorial below.
 
-Or you can get growtopia with edited: [GrowtopiaLatestEdited](https://bit.ly/3lHn4Vv)
+#### 1. Antisplit the apk
+If you see a split sign like the picture below then follow these steps:
 
-### 2. Add your library to apk
+![](https://cdn.discordapp.com/attachments/488978346697424907/901407788067069962/unknown.png)
 
-Copy the library file (.so) from `libs/armeabi-v7a` to the target game. Watch out the folder names, we don't want to mix them up, so make sure to copy our lib file to the correct architecture. Like our armeabi-v7a lib goes to the target games armeabi-v7a folder, arm64-v8a lib goes to the arm64-v8a folder...
+Click the growtopia apk and press antisplit as shown below:
+
+![](https://cdn.discordapp.com/attachments/488978346697424907/901408001313894480/unknown.png)
+
+Select the apk signature as shown below:
+
+![](https://cdn.discordapp.com/attachments/488978346697424907/901408621211029534/unknown.png)
+
+And install the growtopia apk.
+
+#### 2. Decompile growtopia apk
+Click the growtopia apk and press decompile as shown below:
+
+![](https://cdn.discordapp.com/attachments/488978346697424907/901409650090573914/unknown.png)
+
+Do what the image below does:
+
+![](https://cdn.discordapp.com/attachments/488978346697424907/901409767019409408/unknown.png)
+
+And press go to:
+
+![](https://cdn.discordapp.com/attachments/488978346697424907/901409975052673054/unknown.png)
+
+#### 3. Add your library to apk
+Copy the library file (.so) from `libs` to the target game. Watch out the folder names, we don't want to mix them up, so make sure to copy our lib file to the correct architecture. Like our armeabi-v7a lib goes to the target games armeabi-v7a folder, arm64-v8a lib goes to the arm64-v8a folder...
 
 PUTTING THE LIB FILE ON A WRONG ARCHITECTURE LIKE PUTTING ARM64 LIB TO ARMV7 WILL RESULT A CRASH!
 
-![](https://i.imgur.com/oZq1Wq7.png)
+Now go to `lib/{arch}`:
 
-### 1. Load your library
+![](https://cdn.discordapp.com/attachments/488978346697424907/901410620933541898/unknown.png)
 
-Now go to `smali/com/rtsoft/growtopia` and open the `Main.smali` file, Add this code before `const-string v0, "growtopia"`.
-```smali
-const-string v0, "ModMenu"
+You can use second tab to copy library file to target game lib:
 
-invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
-```
+![](https://cdn.discordapp.com/attachments/488978346697424907/901410854174613524/unknown.png)
+
+And paste library file to target game lib:
+
+![](https://cdn.discordapp.com/attachments/488978346697424907/901410915893772328/unknown.png)
+
+#### 4. Load your library
+Now go to `smali/com/rtsoft/growtopia`:
+
+![](https://cdn.discordapp.com/attachments/488978346697424907/901412534756724756/unknown.png)
+
+and open the `Main.smali` file, Add this code before `const-string v0, "growtopia"`.
+  ```smali
+  const-string v0, "ModMenu"
+
+  invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
+  ```
+
+Like the picture below:
 
 ![](https://cdn.discordapp.com/attachments/773831752271527946/896769601218691142/unknown.png)
 
-If you don't see `smali` folder in APK Editor:
-
-![](https://cdn.discordapp.com/attachments/773831752271527946/896772004651356240/unknown.png)
-
-### 4. Compiling game apk
+#### 5. Compiling game apk
 Now compile and sign the apk, and install it on your device. Congrats. You have successfully implemented a mod menu.
 
-#### Some parts of this content from [LGLTeam Mod Menu](https://github.com/LGLTeam/Android-Mod-Menu)
+![](https://cdn.discordapp.com/attachments/488978346697424907/901411013793021952/unknown.png)
+</details>
+
+<details>
+  <summary markdown="span">Windows</summary>
+
+Later ok?
+</details>
+
+Some parts of this content from [LGLTeam Mod Menu](https://github.com/LGLTeam/Android-Mod-Menu)
 
 ## Thanks to
 - [GuckTubeYT](https://github.com/GuckTubeYT)
 - [adhptrh](https://github.com/adhptrh)
 
 ## Credits
+- [Obfuscate](https://github.com/adamyaxley/Obfuscate)
+- [RandUtils](https://gist.github.com/imneme/540829265469e673d045)
 - [Kitty Memory](https://github.com/MJx0/KittyMemory)
 - [Substrate](http://www.cydiasubstrate.com/)
+- [And64InlineHook](https://github.com/Rprop/And64InlineHook)

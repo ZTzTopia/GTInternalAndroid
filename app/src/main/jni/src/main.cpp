@@ -8,14 +8,13 @@
 
 #include <android/log.h>
 #include <dlfcn.h>
-#include <jni.h>
 #include <pthread.h>
 #include <unistd.h>
 
-#include "main.h"
 #include "game/Hook.h"
+#include "utilities/Macros.h"
 #include "utilities/CrashDump.h"
-#include "utilities/Utils.h"
+#include "include/randutils.hpp"
 
 void *g_GrowtopiaHandle = nullptr;
 KittyMemory::ProcMap g_GrowtopiaMap = {};

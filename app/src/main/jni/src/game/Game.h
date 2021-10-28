@@ -1,5 +1,4 @@
 #pragma once
-#include "main.h"
 #include "Common.h"
 
 namespace Game {

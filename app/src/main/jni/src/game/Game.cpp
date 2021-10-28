@@ -1,8 +1,5 @@
 #include "Game.h"
-#include "gui/Gui.h"
-#include "gui/Utils.h"
 #include "utilities/Macros.h"
-#include "utilities/Logging.h"
 
 Game::Game::Game() {
     m_cheatList.clear();

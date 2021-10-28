@@ -1,9 +1,7 @@
-#include <iostream>
 #include <csignal>
 #include <dlfcn.h>
 
 #include "CrashDump.h"
-#include "main.h"
 #include "Macros.h"
 
 void Utilities::CrashDump::Init() {
