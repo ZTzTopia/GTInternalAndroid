@@ -4,31 +4,33 @@
 #include "backends/imgui_impl_opengl3.h"
 #include <GLES2/gl2.h>
 
-class Gui {
-public:
-    Gui();
-    ~Gui();
+namespace Gui {
+    class Gui {
+    public:
+        Gui();
+        ~Gui();
 
-    void Init();
-    void SetupImGuiStyle() const;
-    void Render();
-    void OnTouchEvent(int type, __unused  bool multi, float x, float y);
+        void Init();
+        void SetupImGuiStyle() const;
+        void Render();
+        void OnTouchEvent(int type, __unused  bool multi, float x, float y);
 
-private:
-    enum eTouchEvent {
-        TOUCH_MOVE,
-        TOUCH_POP,
-        TOUCH_PUSH
+    private:
+        enum eTouchEvent {
+            TOUCH_MOVE,
+            TOUCH_POP,
+            TOUCH_PUSH
+        };
+
+    public:
+        ImVec2 m_screenSize;
+        ImVec2 m_scale;
+
+    private:
+        bool m_initialized;
+        bool m_needClearMousePos;
     };
-
-public:
-    ImVec2 m_screenSize;
-    ImVec2 m_scale;
-
-private:
-    bool m_initialized;
-    bool m_needClearMousePos;
-};
+}
 
 namespace ImGui {
     static bool custom_UseFontOutline;

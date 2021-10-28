@@ -8,21 +8,21 @@
 
 std::mt19937 g_generator; // NOLINT(cert-msc51-cpp)
 
-void Utils::RandomSeed() {
+void Utilities::Utils::RandomSeed() {
     g_generator.seed(randutils::auto_seed_128{}.base());
 }
 
-int Utils::Random(int min, int max) {
+int Utilities::Utils::Random(int min, int max) {
     std::uniform_int_distribution<int> distribution(min, max);
     return distribution(g_generator);
 }
 
-float Utils::RandomFloat(float min, float max) {
+float Utilities::Utils::RandomFloat(float min, float max) {
     std::uniform_real_distribution<float> distribution(min, max);
     return distribution(g_generator);
 }
 
-uintptr_t Utils::String2Offset(const char *c) {
+uintptr_t Utilities::Utils::String2Offset(const char *c) {
     int base = 16;
     // See if this function catches all possibilities.
     // If it doesn't, the function would have to be amended
@@ -41,8 +41,8 @@ uintptr_t Utils::String2Offset(const char *c) {
     return strtoull(c, nullptr, base);
 }
 
-/*Utils::Split Utils::Split::Parse(std::string string, const std::string& delimiter) {
-    Utils::Split split{};
+/*Utilities::Split Utilities::Split::Parse(std::string string, const std::string& delimiter) {
+    Utilities::Split split{};
 
     bool isKey = true;
     std::size_t pos;
@@ -60,7 +60,7 @@ uintptr_t Utils::String2Offset(const char *c) {
     return split;
 }
 
-std::string Utils::Split::Get(const std::string& key) {
+std::string Utilities::Split::Get(const std::string& key) {
     if (!IsValid()) {
         return "";
     }
@@ -74,7 +74,7 @@ std::string Utils::Split::Get(const std::string& key) {
     return "";
 }
 
-void Utils::Split::Set(const std::string& key, const std::string& value) {
+void Utilities::Split::Set(const std::string& key, const std::string& value) {
     if (!IsValid()) {
         return;
     }
@@ -87,7 +87,7 @@ void Utils::Split::Set(const std::string& key, const std::string& value) {
     }
 }
 
-std::string Utils::Split::Serialize(const std::string& delimiter) {
+std::string Utilities::Split::Serialize(const std::string& delimiter) {
     if (!IsValid()) {
         return "";
     }

@@ -1,10 +1,12 @@
 #pragma once
 
 namespace Utilities {
-    void RandomSeed();
-    int Random(int min, int max);
-    float RandomFloat(float min, float max);
-    uintptr_t String2Offset(const char *c);
+    namespace Utils {
+        void RandomSeed();
+        int Random(int min, int max);
+        float RandomFloat(float min, float max);
+        uintptr_t String2Offset(const char *c);
+    }
 
     /*class Split {
     public:

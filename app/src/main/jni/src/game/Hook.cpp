@@ -2,24 +2,31 @@
 #include <android/log.h>
 #include <dlfcn.h>
 #include <pthread.h>
+#include <enet/enet.h>
 
 #include "Hook.h"
-#include "../main.h"
+#include "main.h"
 #include "Common.h"
 #include "Game.h"
-#include "../gui/Gui.h"
+#include "gui/Gui.h"
+#include "utilities/Macros.h"
 
-extern Gui *g_Gui;
-extern Game *g_Game;
+Gui::Gui *g_Gui = nullptr;
+Game::Game *g_Game = nullptr;
 
+_OnTouchEvent *g_OnTouchEvent = nullptr;
+
+void (*AppOnTouch)(void *a1, void *a2, int type, float x, float y, int multi);
 void SendOnTouchEvent(bool sendTruePos) {
     if (sendTruePos) {
-        AppOnTouch(Hook::g_onTouchEvent->ontouchThiz, OnTouchEvent.ontouchObject, OnTouchEvent.ontouchType,
-                   g_onTouchEvent->ontouchX, OnTouchEvent.ontouchY, OnTouchEvent.ontouchMulti);
+        AppOnTouch(g_OnTouchEvent->ontouchThiz, g_OnTouchEvent->ontouchObject, g_OnTouchEvent->ontouchType,
+                   g_OnTouchEvent->ontouchX, g_OnTouchEvent->ontouchY, g_OnTouchEvent->ontouchMulti);
     } else {
-        AppOnTouch(OnTouchEvent.ontouchThiz, OnTouchEvent.ontouchObject, 1, -1.0f, -1.0f,
-                   OnTouchEvent.ontouchMulti);
+        AppOnTouch(g_OnTouchEvent->ontouchThiz, g_OnTouchEvent->ontouchObject, 1, -1.0f, -1.0f,
+                   g_OnTouchEvent->ontouchMulti);
     }
+
+    delete g_OnTouchEvent;
 }
 
 void (*BaseApp_Draw)(void *thiz);
@@ -30,11 +37,11 @@ void BaseApp_Draw_hook(void *thiz) {
     static bool initialized = false;
     if (!initialized) {
         // Initialize Gui.
-        g_Gui = new Gui;
+        g_Gui = new Gui::Gui;
         g_Gui->Init();
 
         // Initialize Game.
-        g_Game = new Game;
+        g_Game = new Game::Game;
         g_Game->Init();
 
         initialized = true;
@@ -60,20 +67,19 @@ void BaseApp_SetFPSLimit_hook(void *thiz, float fps) {
     }
 }
 
-void (*AppOnTouch)(void *a1, void *a2, int type, float x, float y, int multi);
 void AppOnTouch_hook(void *thiz, void *object, int type, float x, float y, int multi) {
+    // Send it later after checking any item imgui active.
+    g_OnTouchEvent = new _OnTouchEvent;
+    g_OnTouchEvent->ontouchThiz = thiz;
+    g_OnTouchEvent->ontouchObject = object;
+    g_OnTouchEvent->ontouchType = type;
+    g_OnTouchEvent->ontouchX = x;
+    g_OnTouchEvent->ontouchY = y;
+    g_OnTouchEvent->ontouchMulti = multi;
+
     if (g_Gui && (x > 0.0 || y > 0.0)) {
         g_Gui->OnTouchEvent(type, multi, x, y);
     }
-
-    // Send it later after checking any item imgui active.
-    memset(&OnTouchEvent, 0, sizeof(OnTouchEvent));
-    OnTouchEvent.ontouchThiz = thiz;
-    OnTouchEvent.ontouchObject = object;
-    OnTouchEvent.ontouchType = type;
-    OnTouchEvent.ontouchX = x;
-    OnTouchEvent.ontouchY = y;
-    OnTouchEvent.ontouchMulti = multi;
 }
 
 void (*NetHTTP_Update)(NetHTTP *thiz);
@@ -107,23 +113,21 @@ void SendPacket_hook(int type, std::string const &data, ENetPeer *peer) {
     SendPacket(type, data, peer);
 }
 
-void Hook::Init() {
+void Game::Hook::Init() {
     LOGD("Initializing Hook..");
 
     // BaseApp::Draw()
     HOOK(GTS("_ZN7BaseApp4DrawEv"), (void *)BaseApp_Draw_hook, (void **)&BaseApp_Draw);
 
     // BaseApp::SetFPSLimit()
-//    HOOK(GTS("_ZN7BaseApp11SetFPSLimitEf"), (void *) BaseApp_SetFPSLimit_hook,
-//         (void **) &BaseApp_SetFPSLimit);
+    HOOK(GTS("_ZN7BaseApp11SetFPSLimitEf"), (void *)BaseApp_SetFPSLimit_hook, (void **)&BaseApp_SetFPSLimit);
 
     // AppOnTouch()
     HOOK(GTS("_Z10AppOnTouchP7_JNIEnvP8_jobjectiffi"), (void *)AppOnTouch_hook, (void **)&AppOnTouch);
 
     // NetHTTP::Update()
-//    HOOK(GTS("_ZN7NetHTTP6UpdateEv"), (void *) NetHTTP_Update_hook, (void **) &NetHTTP_Update);
+    HOOK(GTS("_ZN7NetHTTP6UpdateEv"), (void *)NetHTTP_Update_hook, (void **)&NetHTTP_Update);
 
     // SendPacket()
-//    HOOK(GTS("_Z10SendPacket15eNetMessageTypeRKSsP9_ENetPeer"), (void *) SendPacket_hook,
-//         (void **) &SendPacket);
+    HOOK(GTS("_Z10SendPacket15eNetMessageTypeRKSsP9_ENetPeer"), (void *)SendPacket_hook, (void **)&SendPacket);
 }

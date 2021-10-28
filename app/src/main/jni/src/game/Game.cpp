@@ -1,9 +1,10 @@
 #include "Game.h"
-#include "../gui/Gui.h"
-#include "../gui/GuiUtils.h"
-#include "../utilities/Logging.h"
+#include "gui/Gui.h"
+#include "gui/Utils.h"
+#include "utilities/Macros.h"
+#include "utilities/Logging.h"
 
-Game::Game() {
+Game::Game::Game() {
     m_cheatList.clear();
 
     m_fpsLimit = 60.0f;
@@ -13,7 +14,7 @@ Game::Game() {
     m_growtopiaServerIp = "??";
 }
 
-void Game::Init() {
+void Game::Game::Init() {
     LOGD("Initializing Game..");
 
 #ifdef __arm__
@@ -26,7 +27,7 @@ void Game::Init() {
     std::string RETFLOAT1 = "00F0A7D2C0035FD6";
 #endif
 
-    struct stCheatList cheatList = {};
+    struct _CheatList cheatList = {};
     cheatList.cheatName = OBFUSCATE("Mod Fly");
 #ifdef __arm__
     cheatList.cheatAddr = GT("0xb5da1c"); // NetMoving::collide() -> WorldTileMap::Collide()
@@ -93,8 +94,8 @@ void Game::Init() {
     m_cheatList.push_back(cheatList);
 }
 
-bool Game::GetCheatState(const std::string& cheatName) {
-    for (const stCheatList& cheatList : m_cheatList) {
+bool Game::Game::GetCheatState(const std::string& cheatName) {
+    for (const _CheatList& cheatList : m_cheatList) {
         if (cheatList.cheatName.find(cheatName) != -1) {
             return cheatList.cheatState;
         }

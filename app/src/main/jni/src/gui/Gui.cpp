@@ -1,5 +1,5 @@
 #include "Gui.h"
-#include "GuiUtils.h"
+#include "Utils.h"
 #include "Ui.h"
 #include "../game/Game.h"
 #include "../main.h"
@@ -7,11 +7,11 @@
 #define MULT_X	0.00052083333f	// 1/1920
 #define MULT_Y	0.00092592592f 	// 1/1080
 
-extern Game* g_Game;
+extern Game::Game* g_Game;
 
 void SendOnTouchEvent(bool sendTruePos);
 
-Gui::Gui() {
+Gui::Gui::Gui() {
     m_initialized = false;
     m_screenSize = ImVec2(0.0, 0.0);
 
@@ -19,14 +19,14 @@ Gui::Gui() {
     m_needClearMousePos = true;
 }
 
-Gui::~Gui() {
+Gui::Gui::~Gui() {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
     m_initialized = false;
 }
 
-void Gui::Init() {
+void Gui::Gui::Init() {
     if (m_initialized) {
         return;
     }
@@ -68,7 +68,7 @@ void Gui::Init() {
     m_initialized = true;
 }
 
-void Gui::SetupImGuiStyle() const {
+void Gui::Gui::SetupImGuiStyle() const {
     ImGuiStyle& style = ImGui::GetStyle();
     ImGui::StyleColorsClassic();
 
@@ -86,7 +86,7 @@ void Gui::SetupImGuiStyle() const {
     style.Colors[ImGuiCol_CheckMark] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
-void Gui::Render() {
+void Gui::Gui::Render() {
     if (!m_initialized) {
         return;
     }
@@ -152,7 +152,7 @@ void Gui::Render() {
     }
 }
 
-void Gui::OnTouchEvent(int type, __unused bool multi, float x, float y) {
+void Gui::Gui::OnTouchEvent(int type, __unused bool multi, float x, float y) {
     if (!m_initialized) {
         return;
     }

@@ -3,6 +3,13 @@
 #include <android/log.h>
 
 #include "Utils.h"
+#include "include/obfuscate.h"
+#if defined(__arm__)
+#include "include/Substrate/SubstrateHook.h"
+#include "include/Substrate/CydiaSubstrate.h"
+#else
+#include "include/And64InlineHook/And64InlineHook.hpp"
+#endif
 
 #define TAG "ModMenu"
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG,   TAG, __VA_ARGS__))
@@ -21,7 +28,7 @@
 #define LOGWD(...) ((void)__android_log_print(ANDROID_LOG_WARNING, TAGD, __VA_ARGS__))
 #endif
 
-#define GT(x) reinterpret_cast<void*>(KittyMemory::getAbsoluteAddress(g_GrowtopiaMap, Utils::String2Offset(OBFUSCATE(x))))
+#define GT(x) reinterpret_cast<void*>(KittyMemory::getAbsoluteAddress(g_GrowtopiaMap, Utilities::Utils::String2Offset(OBFUSCATE(x))))
 #define GTS(x) dlsym(g_GrowtopiaHandle, OBFUSCATE(x))
 
 #ifdef __arm__

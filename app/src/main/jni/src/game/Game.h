@@ -1,5 +1,5 @@
 #pragma once
-#include "../main.h"
+#include "main.h"
 #include "Common.h"
 
 namespace Game {
@@ -17,6 +17,6 @@ namespace Game {
         __unused std::string m_growtopiaVersion;
         __unused std::string m_growtopiaFlags;
         std::string m_growtopiaServerIp;
-        std::vector<stCheatList> m_cheatList;
+        std::vector<_CheatList> m_cheatList;
     };
 }

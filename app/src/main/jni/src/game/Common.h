@@ -1,4 +1,5 @@
 #pragma once
+#include "include/KittyMemory/MemoryPatch.hpp"
 
 // We no need the fucking whole file proton.
 typedef struct _NetHTTP {
@@ -13,9 +14,9 @@ typedef struct _OnTouchEvent {
     float ontouchX;
     float ontouchY;
     int ontouchMulti;
-} OnTouchEvent;
+};
 
-typedef struct stCheatList {
+typedef struct _CheatList {
     std::string cheatName;
     bool cheatOldState;
     bool cheatState;

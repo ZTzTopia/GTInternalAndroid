@@ -3,9 +3,10 @@
 #include <dlfcn.h>
 
 #include "CrashDump.h"
-#include "../main.h"
+#include "main.h"
+#include "Macros.h"
 
-void CrashDump::Init() {
+void Utilities::CrashDump::Init() {
     LOGD("Initializing CrashDump..");
 
     struct sigaction act = {};
@@ -45,7 +46,7 @@ void CrashDump::Init() {
     sigaction(SIGTERM, &act, nullptr);
 }
 
-void CrashDump::Handler(__unused int signum, siginfo_t *info, void* contextPtr) {
+void Utilities::CrashDump::Handler(__unused int signum, siginfo_t *info, void* contextPtr) {
     auto* context = reinterpret_cast<ucontext_t *>(contextPtr);
     switch (info->si_signo) {
         case SIGSEGV:
@@ -69,7 +70,7 @@ void CrashDump::Handler(__unused int signum, siginfo_t *info, void* contextPtr) 
     }
 }
 
-void CrashDump::CrashReport(ucontext* context, siginfo_t *info, const char* typeName) {
+void Utilities::CrashDump::CrashReport(ucontext* context, siginfo_t *info, const char* typeName) {
     Dl_info info_pc, info_lr;
 
 #ifdef __arm__
@@ -95,7 +96,7 @@ void CrashDump::CrashReport(ucontext* context, siginfo_t *info, const char* type
         LOGE("lr: %s", info_lr.dli_sname);
     }
 #elif __aarch64__
-    LOGE("SIGNO: %s | Fault address: 0x%X", szTypeName, info->si_addr);
+    LOGE("SIGNO: %s | Fault address: 0x%X", typeName, info->si_addr);
     LOGE("SIGACTION signal %d (si_code: %d si_errno: %d si_signo: %d)", info, info->si_code, info->si_errno, info->si_signo);
 
     LOGE("register states:");

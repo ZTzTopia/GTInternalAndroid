@@ -1,5 +1,5 @@
 #include "Logging.h"
 
-void Logging::Log() {
+void Utilities::Logging::Log() {
     // Todo: log to file
 }

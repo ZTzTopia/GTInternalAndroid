@@ -1,8 +1,6 @@
-namespace Ui {
-    void MainRender();
-    void CheatRender();
-}
-
-namespace UiGlobals {
-    inline bool ModFly;
+namespace Gui {
+    namespace Ui {
+        void MainRender();
+        void CheatRender();
+    }
 }

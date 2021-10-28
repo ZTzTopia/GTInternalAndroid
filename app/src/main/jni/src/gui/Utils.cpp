@@ -1,14 +1,14 @@
-#include "GuiUtils.h"
+#include "Utils.h"
 #include "Gui.h"
 #include "../utilities/Logging.h"
 
-bool GuiUtils::IsAnyScrollBarActive() {
+bool Gui::Utils::IsAnyScrollBarActive() {
     ImGuiWindow *window = ImGui::GetCurrentWindow();
     ImGuiID active_id = ImGui::GetActiveID();
     return (active_id && (active_id == ImGui::GetWindowScrollbarID(window, ImGuiAxis_X) || active_id == ImGui::GetWindowScrollbarID(window, ImGuiAxis_Y)));
 }
 
-bool GuiUtils::MouseOnImguiTitleBarWindow() {
+bool Gui::Utils::MouseOnImguiTitleBarWindow() {
     ImGuiContext& g = *GImGui;
     ImGuiIO &io = ImGui::GetIO();
     ImGuiWindow *window = ImGui::GetCurrentWindow();
@@ -26,7 +26,7 @@ bool GuiUtils::MouseOnImguiTitleBarWindow() {
     return true;
 }
 
-void GuiUtils::ScrollWhenDraggingOnVoid() {
+void Gui::Utils::ScrollWhenDraggingOnVoid() {
     ImGuiIO &io = ImGui::GetIO();
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 windowSize = ImGui::GetWindowSize();

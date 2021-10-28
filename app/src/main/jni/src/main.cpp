@@ -14,8 +14,6 @@
 
 #include "main.h"
 #include "game/Hook.h"
-#include "game/Game.h"
-#include "gui/Gui.h"
 #include "utilities/CrashDump.h"
 #include "utilities/Utils.h"
 
@@ -29,7 +27,7 @@ void *main_thread(void *) {
 
     // Initialize random seed for Random and RandomFloat. We need to give time for the
     // seed random generator to work.
-    Utilities::RandomSeed();
+    Utilities::Utils::RandomSeed();
 
     do {
         g_GrowtopiaMap = KittyMemory::getLibraryMap("libgrowtopia.so");
@@ -45,7 +43,7 @@ void *main_thread(void *) {
 
     // Check if growtopia map and growtopia handle is valid.
     if (g_GrowtopiaMap.isValid() && g_GrowtopiaHandle != nullptr) {
-        Hook::Init();
+        Game::Hook::Init();
     }
 
     // Now we can exit the thread.

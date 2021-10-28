@@ -1,12 +1,12 @@
 #include "Ui.h"
 #include "Gui.h"
-#include "GuiUtils.h"
+#include "Utils.h"
 #include "../game/Game.h"
 #include "../game/Common.h"
 
-extern Game* g_Game;
+extern Game::Game* g_Game;
 
-void Ui::MainRender() {
+void Gui::Ui::MainRender() {
     ImGuiStyle& style = ImGui::GetStyle();
 
     // TitleBar.
@@ -51,11 +51,11 @@ void Ui::MainRender() {
     ImGui::PopStyleVar(2);
 }
 
-void Ui::CheatRender() {
+void Gui::Ui::CheatRender() {
     ImGui::TextColored(ImColor(123, 129, 138, 255), "All");
 
     // Checkbox
-    for (stCheatList& cheatList : g_Game->m_cheatList) {
+    for (_CheatList& cheatList : g_Game->m_cheatList) {
         if (ImGui::Checkbox(cheatList.cheatName.c_str(), &cheatList.cheatState)) {
             if (cheatList.cheatActive != nullptr) {
                 cheatList.cheatActive();
