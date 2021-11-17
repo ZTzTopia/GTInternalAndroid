@@ -2,70 +2,31 @@
 #include "../gui/Gui.h"
 #include "../gui/GuiUtils.h"
 #include "../utilities/Logging.h"
+#include "../utilities/Macros.h"
 
 Game::Game() {
-#if defined(__arm__)
-    /*
-        mov r0, #0x0
-        bx lr
-     */
-    // 0000A0E31EFF2FE1 - To return false
-
-    /*
-        mov r0, #0x1
-        bx lr
-     */
-    // 0100A0E31EFF2FE1 - To return true
-
-    /*
-        mov r0, #0x7f000000
-        bx lr
-     */
-    // 7F04A0E31EFF2FE1 - To return high value
-
-    /*
-        nop
-     */
-    // 00F020E3 - NOP
-	
+#ifdef __arm__
+    std::string RETFALSE = "0000A0E31EFF2FE1";
+    std::string RETTRUE = "0100A0E31EFF2FE1";
+    std::string RETFLOAT1 = "FE05A0E31EFF2FE1";
+#elif __aarch64__
+    std::string RETFALSE = "000080D2C0035FD6";
+    std::string RETTRUE = "200080D2C0035FD6";
+    std::string RETFLOAT1 = "00F0A7D2C0035FD6";
+#endif
+  
     // NetMoving::collide() -> WorldTileMap::Collide()
     m_gameHack.ModFly = MemoryPatch::nopPatch(GT(0xb5da1c), 1);
 
     // Tile::IsCheckpoint()
-    m_gameHack.AntiCheckpoint = MemoryPatch::createWithHex(GT(0x88c4b0), "0000A0E31EFF2FE1");
-#else
-	/*
-        mov x0, #0
-		ret 
-     */
-    // 000080D2C0035FD6 - To return false
-
-    /*
-        mov x0, #0x1
-        ret
-     */
-    // 200080D2C0035FD6 - To return true
-
-    /*
-        mov x0, #0x7f000000
-        ret
-     */
-    // 00E0AFD2C0035FD6 - To return high value
-
-    /*
-        nop
-     */
-    // 1F2003D5 - NOP
+    m_gameHack.AntiCheckpoint = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(GTS("_ZN4Tile12IsCheckpointEv")), RETFALSE);
 	
-	// NetMoving::collide() -> WorldTileMap::Collide()
-    m_gameHack.ModFly = MemoryPatch::createWithHex(GT(0xb5da1c), "1F2003D5");
-
-    // Tile::IsCheckpoint()
-    m_gameHack.AntiCheckpoint = MemoryPatch::createWithHex(GT(0x88c4b0), "000080D2C0035FD6");
-#endif
+    // NetMoving::collide()
+    m_gameHack.FastFall = MemoryPatch::createWithHex(reinterpret_cast<uintptr_t>(GTS("_ZN9NetMoving7collideESsffP11CollideInfoib")), RETFALSE);
 
     m_gameHackState.ModFlyChecked = false;
     m_gameHackState.AntiCheckpointChecked = false;
+	  m_gameHackState.FastFallChecked = false;
 }
 
 void Game::HackRender() {
@@ -84,6 +45,9 @@ void Game::HackRender() {
 
     ImGui::Checkbox("Anti Checkpoint", &m_gameHackState.AntiCheckpointChecked);
     AntiCheckpoint(m_gameHackState.AntiCheckpointChecked);
+
+	  ImGui::Checkbox("Fast Fall", &m_gameHackState.FastFallChecked);
+    AntiCheckpoint(m_gameHackState.FastFallChecked);
 
     // Scrolling without press ScrollBar
     GuiUtils::ScrollWhenDraggingOnVoid();
@@ -104,6 +68,14 @@ void Game::AntiCheckpoint(bool checked) {
     static bool old = false;
     if (old != checked) {
         checked ? m_gameHack.AntiCheckpoint.Modify() : m_gameHack.AntiCheckpoint.Restore();
+        old = checked;
+    }
+}
+
+void Game::FastFall(bool checked) {
+	static bool old = false;
+    if (old != checked) {
+        checked ? m_gameHack.FastFall.Modify() : m_gameHack.FastFall.Restore();
         old = checked;
     }
 }
