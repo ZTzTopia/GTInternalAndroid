@@ -22,6 +22,7 @@ void PrintSymbol(void* pc, void* lr) {
 }
 
 void CrashReport(ucontext* context, siginfo_t *info, const char* szTypeName) {
+#if defined(__arm__)
     LOGE("SIGNO: %s | Fault address: 0x%X", szTypeName, info->si_addr);
     LOGE("SIGACTION signal %d (si_code: %d si_errno: %d si_signo: %d)", info, info->si_code, info->si_errno, info->si_signo);
 
@@ -36,7 +37,8 @@ void CrashReport(ucontext* context, siginfo_t *info, const char* szTypeName) {
     LOGE("2: 0x%X (libgrowtopia: 0x%X)", context->uc_mcontext.arm_lr, context->uc_mcontext.arm_lr - (int)g_GrowtopiaMap.startAddr);
 
     PrintSymbol((void*)(context->uc_mcontext.arm_pc), (void*)(context->uc_mcontext.arm_lr));
-
+#endif
+// TODO: for arm64
     exit(0);
 }
 

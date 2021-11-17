@@ -68,6 +68,11 @@ void InitHook() {
     LOGD("Initializing Hook..");
 
     // Hard to explain btw :D
+#if defined(__arm__)
     MSHookFunction(GTS("_ZN7BaseApp4DrawEv"), (void*)BaseApp_draw_hook, (void**)&BaseApp_draw);
     MSHookFunction(GTS("_Z10AppOnTouchP7_JNIEnvP8_jobjectiffi"), (void*)AppOnTouch_hook, (void**)&AppOnTouch);
+#else
+	A64HookFunction(GTS("_ZN7BaseApp4DrawEv"), (void*)BaseApp_draw_hook, (void**)&BaseApp_draw);
+    A64HookFunction(GTS("_Z10AppOnTouchP7_JNIEnvP8_jobjectiffi"), (void*)AppOnTouch_hook, (void**)&AppOnTouch);
+#endif
 }

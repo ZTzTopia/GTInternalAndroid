@@ -7,7 +7,8 @@ FILE(GLOB FILE_INCLUDES
         src/game/*.h*
         src/game/*.h*
         src/gui/*.h*
-        src/include/Substrate/*h*
+        src/include/Substrate/*.h*
+		src/include/And64InlineHook/*.h*
         src/include/KittyMemory/*.h*
         src/utilities/*.h*
         vendor/imgui/*.h*)
@@ -16,7 +17,8 @@ FILE(GLOB FILE_SOURCES
         src/*.c*
         src/game/*.c*
         src/gui/*.c*
-        src/include/Substrate/*c*
+        src/include/Substrate/*.c*
+		src/include/And64InlineHook/*.c*
         src/include/KittyMemory/*.c*
         src/utilities/*.c*
         vendor/imgui/*.c*)

@@ -4,6 +4,7 @@
 #include "../utilities/Logging.h"
 #include "../utilities/Macros.h"
 
+Game::Game() {
 #ifdef __arm__
     std::string RETFALSE = "0000A0E31EFF2FE1";
     std::string RETTRUE = "0100A0E31EFF2FE1";
@@ -13,8 +14,7 @@
     std::string RETTRUE = "200080D2C0035FD6";
     std::string RETFLOAT1 = "00F0A7D2C0035FD6";
 #endif
-
-Game::Game() {
+  
     // NetMoving::collide() -> WorldTileMap::Collide()
     m_gameHack.ModFly = MemoryPatch::nopPatch(GT(0xb5da1c), 1);
 
@@ -26,7 +26,7 @@ Game::Game() {
 
     m_gameHackState.ModFlyChecked = false;
     m_gameHackState.AntiCheckpointChecked = false;
-	m_gameHackState.FastFallChecked = false;
+	  m_gameHackState.FastFallChecked = false;
 }
 
 void Game::HackRender() {
@@ -46,7 +46,7 @@ void Game::HackRender() {
     ImGui::Checkbox("Anti Checkpoint", &m_gameHackState.AntiCheckpointChecked);
     AntiCheckpoint(m_gameHackState.AntiCheckpointChecked);
 
-	ImGui::Checkbox("Fast Fall", &m_gameHackState.FastFallChecked);
+	  ImGui::Checkbox("Fast Fall", &m_gameHackState.FastFallChecked);
     AntiCheckpoint(m_gameHackState.FastFallChecked);
 
     // Scrolling without press ScrollBar
