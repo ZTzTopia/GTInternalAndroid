@@ -1,4 +1,4 @@
-// dear imgui, v1.84
+// dear imgui, v1.86 WIP
 // (tables and columns code)
 
 /*
@@ -324,7 +324,7 @@ bool    ImGui::BeginTableEx(const char* name, ImGuiID id, int columns_count, ImG
     const ImVec2 avail_size = GetContentRegionAvail();
     ImVec2 actual_outer_size = CalcItemSize(outer_size, ImMax(avail_size.x, 1.0f), use_child_window ? ImMax(avail_size.y, 1.0f) : 0.0f);
     ImRect outer_rect(outer_window->DC.CursorPos, outer_window->DC.CursorPos + actual_outer_size);
-    if (use_child_window && IsClippedEx(outer_rect, 0, false))
+    if (use_child_window && IsClippedEx(outer_rect, 0))
     {
         ItemSize(outer_rect);
         return false;
@@ -340,10 +340,9 @@ bool    ImGui::BeginTableEx(const char* name, ImGuiID id, int columns_count, ImG
 
     // Acquire temporary buffers
     const int table_idx = g.Tables.GetIndex(table);
-    g.CurrentTableStackIdx++;
-    if (g.CurrentTableStackIdx + 1 > g.TablesTempDataStack.Size)
-        g.TablesTempDataStack.resize(g.CurrentTableStackIdx + 1, ImGuiTableTempData());
-    ImGuiTableTempData* temp_data = table->TempData = &g.TablesTempDataStack[g.CurrentTableStackIdx];
+    if (++g.TablesTempDataStacked > g.TablesTempData.Size)
+        g.TablesTempData.resize(g.TablesTempDataStacked, ImGuiTableTempData());
+    ImGuiTableTempData* temp_data = table->TempData = &g.TablesTempData[g.TablesTempDataStacked - 1];
     temp_data->TableIndex = table_idx;
     table->DrawSplitter = &table->TempData->DrawSplitter;
     table->DrawSplitter->Clear();
@@ -564,6 +563,7 @@ bool    ImGui::BeginTableEx(const char* name, ImGuiID id, int columns_count, ImG
 // + 0 (for ImGuiTable instance, we are pooling allocations in g.Tables)
 // + 1 (for table->RawData allocated below)
 // + 1 (for table->ColumnsNames, if names are used)
+// Shared allocations per number of nested tables
 // + 1 (for table->Splitter._Channels)
 // + 2 * active_channels_count (for ImDrawCmd and ImDrawIdx buffers inside channels)
 // Where active_channels_count is variable but often == columns_count or columns_count + 1, see TableSetupDrawChannels() for details.
@@ -1170,7 +1170,7 @@ void ImGui::TableUpdateBorders(ImGuiTable* table)
         KeepAliveID(column_id);
 
         bool hovered = false, held = false;
-        bool pressed = ButtonBehavior(hit_rect, column_id, &hovered, &held, ImGuiButtonFlags_FlattenChildren | ImGuiButtonFlags_AllowItemOverlap | ImGuiButtonFlags_PressedOnClick | ImGuiButtonFlags_PressedOnDoubleClick);
+        bool pressed = ButtonBehavior(hit_rect, column_id, &hovered, &held, ImGuiButtonFlags_FlattenChildren | ImGuiButtonFlags_AllowItemOverlap | ImGuiButtonFlags_PressedOnClick | ImGuiButtonFlags_PressedOnDoubleClick | ImGuiButtonFlags_NoNavFocus);
         if (pressed && IsMouseDoubleClicked(0))
         {
             TableSetColumnWidthAutoSingle(table, column_n);
@@ -1260,7 +1260,7 @@ void    ImGui::EndTable()
 
 #if 0
     // Strip out dummy channel draw calls
-    // We have no way to prevent user submitting direct ImDrawList calls into a hidden column (but ImGui:: calls will be clipped out)
+    // We have no way to prevent user submitting direct ImDrawList calls into a hidden column (but Gui:: calls will be clipped out)
     // Pros: remove draw calls which will have no effect. since they'll have zero-size cliprect they may be early out anyway.
     // Cons: making it harder for users watching metrics/debugger to spot the wasted vertices.
     if (table->DummyDrawChannel != (ImGuiTableColumnIdx)-1)
@@ -1381,9 +1381,8 @@ void    ImGui::EndTable()
 
     // Clear or restore current table, if any
     IM_ASSERT(g.CurrentWindow == outer_window && g.CurrentTable == table);
-    IM_ASSERT(g.CurrentTableStackIdx >= 0);
-    g.CurrentTableStackIdx--;
-    temp_data = g.CurrentTableStackIdx >= 0 ? &g.TablesTempDataStack[g.CurrentTableStackIdx] : NULL;
+    IM_ASSERT(g.TablesTempDataStacked > 0);
+    temp_data = (--g.TablesTempDataStacked > 0) ? &g.TablesTempData[g.TablesTempDataStacked - 1] : NULL;
     g.CurrentTable = temp_data ? g.Tables.GetByIndex(temp_data->TableIndex) : NULL;
     if (g.CurrentTable)
     {
@@ -1479,6 +1478,7 @@ void ImGui::TableSetupScrollFreeze(int columns, int rows)
     table->IsUnfrozenRows = (table->FreezeRowsCount == 0); // Make sure this is set before TableUpdateLayout() so ImGuiListClipper can benefit from it.b
 
     // Ensure frozen columns are ordered in their section. We still allow multiple frozen columns to be reordered.
+    // FIXME-TABLE: This work for preserving 2143 into 21|43. How about 4321 turning into 21|43? (preserve relative order in each section)
     for (int column_n = 0; column_n < table->FreezeColumnsRequest; column_n++)
     {
         int order_n = table->DisplayOrderToIndex[column_n];
@@ -2312,7 +2312,7 @@ void ImGui::TableSetupDrawChannels(ImGuiTable* table)
 //
 // Column channels will not be merged into one of the 1-4 groups in the following cases:
 // - The contents stray off its clipping rectangle (we only compare the MaxX value, not the MinX value).
-//   Direct ImDrawList calls won't be taken into account by default, if you use them make sure the ImGui:: bounds
+//   Direct ImDrawList calls won't be taken into account by default, if you use them make sure the Gui:: bounds
 //   matches, by e.g. calling SetCursorScreenPos().
 // - The channel uses more than one draw command itself. We drop all our attempt at merging stuff here..
 //   we could do better but it's going to be rare and probably not worth the hassle.
@@ -3597,8 +3597,8 @@ void ImGui::DebugNodeTableSettings(ImGuiTableSettings* settings)
 
 #else // #ifndef IMGUI_DISABLE_METRICS_WINDOW
 
-void ImGui::DebugNodeTable(ImGuiTable*) {}
-void ImGui::DebugNodeTableSettings(ImGuiTableSettings*) {}
+void Gui::DebugNodeTable(ImGuiTable*) {}
+void Gui::DebugNodeTableSettings(ImGuiTableSettings*) {}
 
 #endif
 
@@ -3987,7 +3987,7 @@ void ImGui::EndColumns()
             const float column_hit_hw = COLUMNS_HIT_RECT_HALF_WIDTH;
             const ImRect column_hit_rect(ImVec2(x - column_hit_hw, y1), ImVec2(x + column_hit_hw, y2));
             KeepAliveID(column_id);
-            if (IsClippedEx(column_hit_rect, column_id, false))
+            if (IsClippedEx(column_hit_rect, column_id)) // FIXME: Can be removed or replaced with a lower-level test
                 continue;
 
             bool hovered = false, held = false;

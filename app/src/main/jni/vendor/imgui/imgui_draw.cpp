@@ -1,4 +1,4 @@
-// dear imgui, v1.84
+// dear imgui, v1.86 WIP
 // (drawing and font code)
 
 /*
@@ -16,7 +16,7 @@ Index of this file:
 // [SECTION] ImFontAtlas glyph ranges helpers
 // [SECTION] ImFontGlyphRangesBuilder
 // [SECTION] ImFont
-// [SECTION] ImGui Internal Render Helpers
+// [SECTION] Gui Internal Render Helpers
 // [SECTION] Decompression code
 // [SECTION] Default font data (ProggyClean.ttf)
 
@@ -574,7 +574,7 @@ int ImDrawList::_CalcCircleAutoSegmentCount(float radius) const
         return IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_CALC(radius, _Data->CircleSegmentMaxError);
 }
 
-// Render-level scissoring. This is passed down to your render function but not used for CPU-side coarse clipping. Prefer using higher-level ImGui::PushClipRect() to affect logic (hit-testing and widget culling)
+// Render-level scissoring. This is passed down to your render function but not used for CPU-side coarse clipping. Prefer using higher-level Gui::PushClipRect() to affect logic (hit-testing and widget culling)
 void ImDrawList::PushClipRect(ImVec2 cr_min, ImVec2 cr_max, bool intersect_with_current_clip_rect)
 {
     ImVec4 cr(cr_min.x, cr_min.y, cr_max.x, cr_max.y);
@@ -1584,7 +1584,7 @@ void ImDrawList::AddText(const ImFont* font, float font_size, const ImVec2& pos,
     if (font_size == 0.0f)
         font_size = _Data->FontSize;
 
-    IM_ASSERT(font->ContainerAtlas->TexID == _CmdHeader.TextureId);  // Use high-level ImGui::PushFont() or low-level ImDrawList::PushTextureId() to change font.
+    IM_ASSERT(font->ContainerAtlas->TexID == _CmdHeader.TextureId);  // Use high-level Gui::PushFont() or low-level ImDrawList::PushTextureId() to change font.
 
     ImVec4 clip_rect = _CmdHeader.ClipRect;
     if (cpu_fine_clip_rect)
@@ -1918,7 +1918,7 @@ ImFontConfig::ImFontConfig()
 //-----------------------------------------------------------------------------
 
 // A work of art lies ahead! (. = white layer, X = black layer, others are blank)
-// The 2x2 white texels on the top left are the ones we'll use everywhere in Dear ImGui to render filled shapes.
+// The 2x2 white texels on the top left are the ones we'll use everywhere in Dear Gui to render filled shapes.
 const int FONT_ATLAS_DEFAULT_TEX_DATA_W = 108; // Actual texture will be 2 times that + 1 spacing.
 const int FONT_ATLAS_DEFAULT_TEX_DATA_H = 27;
 static const char FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS[FONT_ATLAS_DEFAULT_TEX_DATA_W * FONT_ATLAS_DEFAULT_TEX_DATA_H + 1] =
@@ -1998,7 +1998,7 @@ void    ImFontAtlas::ClearInputData()
     ConfigData.clear();
     CustomRects.clear();
     PackIdMouseCursors = PackIdLines = -1;
-    TexReady = false;
+    // Important: we leave TexReady untouched
 }
 
 void    ImFontAtlas::ClearTexData()
@@ -2074,7 +2074,7 @@ ImFont* ImFontAtlas::AddFont(const ImFontConfig* font_cfg)
     if (!font_cfg->MergeMode)
         Fonts.push_back(IM_NEW(ImFont));
     else
-        IM_ASSERT(!Fonts.empty() && "Cannot use MergeMode for the first font"); // When using MergeMode make sure that a font has already been added before. You can use ImGui::GetIO().Fonts->AddFontDefault() to add the default imgui font.
+        IM_ASSERT(!Fonts.empty() && "Cannot use MergeMode for the first font"); // When using MergeMode make sure that a font has already been added before. You can use Gui::GetIO().Fonts->AddFontDefault() to add the default imgui font.
 
     ConfigData.push_back(*font_cfg);
     ImFontConfig& new_font_cfg = ConfigData.back();
@@ -3534,7 +3534,7 @@ void ImFont::RenderChar(ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col
 void ImFont::RenderText(ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip) const
 {
     if (!text_end)
-        text_end = text_begin + strlen(text_begin); // ImGui:: functions generally already provides a valid text_end, so this is merely to handle direct calls.
+        text_end = text_begin + strlen(text_begin); // Gui:: functions generally already provides a valid text_end, so this is merely to handle direct calls.
 
     // Align to be pixel perfect
     pos.x = IM_FLOOR(pos.x);
@@ -3723,9 +3723,9 @@ void ImFont::RenderText(ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col
 }
 
 //-----------------------------------------------------------------------------
-// [SECTION] ImGui Internal Render Helpers
+// [SECTION] Gui Internal Render Helpers
 //-----------------------------------------------------------------------------
-// Vaguely redesigned to stop accessing ImGui global state:
+// Vaguely redesigned to stop accessing Gui global state:
 // - RenderArrow()
 // - RenderBullet()
 // - RenderCheckMark()
@@ -3912,7 +3912,7 @@ void ImGui::RenderRectFilledWithHole(ImDrawList* draw_list, ImRect outer, ImRect
 // Helper for ColorPicker4()
 // NB: This is rather brittle and will show artifact when rounding this enabled if rounded corners overlap multiple cells. Caller currently responsible for avoiding that.
 // Spent a non reasonable amount of time trying to getting this right for ColorButton with rounding+anti-aliasing+ImGuiColorEditFlags_HalfAlphaPreview flag + various grid sizes and offsets, and eventually gave up... probably more reasonable to disable rounding altogether.
-// FIXME: uses ImGui::GetColorU32
+// FIXME: uses Gui::GetColorU32
 void ImGui::RenderColorRectWithAlphaCheckerboard(ImDrawList* draw_list, ImVec2 p_min, ImVec2 p_max, ImU32 col, float grid_step, ImVec2 grid_off, float rounding, ImDrawFlags flags)
 {
     if ((flags & ImDrawFlags_RoundCornersMask_) == 0)

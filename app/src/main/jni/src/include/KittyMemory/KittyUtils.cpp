@@ -1,4 +1,4 @@
-#include "KittyUtils.hpp"
+#include "KittyUtils.h"
 
 static void xtrim(std::string &hex){
     if(hex.compare(0, 2, "0x") == 0){

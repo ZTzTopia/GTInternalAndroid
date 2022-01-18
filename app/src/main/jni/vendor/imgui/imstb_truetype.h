@@ -3043,7 +3043,7 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
                   dy = -dy;
                   t = x0, x0 = xb, xb = t;
                   // [DEAR IMGUI] Fix static analyzer warning
-                  (void)dx; // [ImGui: fix static analyzer warning]
+                  (void)dx; // [Gui: fix static analyzer warning]
                }
 
                x1 = (int) x_top;

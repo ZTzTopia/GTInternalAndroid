@@ -23,14 +23,11 @@ std::cout << obfuscated_string << std::endl;
 ----------------------------------------------------------------------------- */
 #pragma once
 
-#include <cstddef>
-#include <string>
-
 #ifndef AY_OBFUSCATE_DEFAULT_KEY
 // The default 64 bit key to obfuscate strings with.
 // This can be user specified by defining AY_OBFUSCATE_DEFAULT_KEY before
 // including obfuscate.h
-#define AY_OBFUSCATE_DEFAULT_KEY 0x9D118A87F5A513E7
+#define AY_OBFUSCATE_DEFAULT_KEY ay::generate_key(__LINE__)
 #endif
 
 namespace ay
@@ -38,24 +35,30 @@ namespace ay
     using size_type = unsigned long long;
     using key_type = unsigned long long;
 
+    // Generate a psuedo-random key that spans all 8 bytes
+    constexpr key_type generate_key(key_type seed)
+    {
+        // Use the MurmurHash3 64-bit finalizer to hash our seed
+        key_type key = seed;
+        key ^= (key >> 33);
+        key *= 0xff51afd7ed558ccd;
+        key ^= (key >> 33);
+        key *= 0xc4ceb9fe1a85ec53;
+        key ^= (key >> 33);
+
+        // Make sure that a bit in each byte is set
+        key |= 0x0101010101010101ull;
+
+        return key;
+    }
+
+    // Obfuscates or deobfuscates data with key
     constexpr void cipher(char* data, size_type size, key_type key)
     {
-        // Split the key into unaligned chunks
-        const char chunks[8] = {
-                char(key >> 41),
-                char(key >> 31),
-                char(key >> 7),
-                char(key >> 17),
-                char(key >> 47),
-                char(key),
-                char(key >> 55),
-                char(key >> 25)
-        };
-
-        // Obfuscate with an XOR cipher based on key
+        // Obfuscate with a simple XOR cipher based on key
         for (size_type i = 0; i < size; i++)
         {
-            data[i] ^= chunks[i % 8];
+            data[i] ^= char(key >> ((i % 8) * 8));
         }
     }
 
@@ -129,12 +132,6 @@ namespace ay
             return m_data;
         }
 
-        operator std::string()
-        {
-            decrypt();
-            return m_data;
-        }
-
         // Manually decrypt the string
         void decrypt()
         {
@@ -183,15 +180,16 @@ namespace ay
 // Obfuscates the string 'data' at compile-time and returns a reference to a
 // ay::obfuscated_data object with global lifetime that has functions for
 // decrypting the string and is also implicitly convertable to a char*
-#define OBFUSCATE(data) OBFUSCATE_KEY(data, AY_OBFUSCATE_DEFAULT_KEY)
+#define AY_OBFUSCATE(data) AY_OBFUSCATE_KEY(data, AY_OBFUSCATE_DEFAULT_KEY)
 
 // Obfuscates the string 'data' with 'key' at compile-time and returns a
 // reference to a ay::obfuscated_data object with global lifetime that has
 // functions for decrypting the string and is also implicitly convertable to a
 // char*
-#define OBFUSCATE_KEY(data, key) \
+#define AY_OBFUSCATE_KEY(data, key) \
 	[]() -> ay::obfuscated_data<sizeof(data)/sizeof(data[0]), key>& { \
 		static_assert(sizeof(decltype(key)) == sizeof(ay::key_type), "key must be a 64 bit unsigned integer"); \
+		static_assert((key) >= (1ull << 56), "key must span all 8 bytes"); \
 		constexpr auto n = sizeof(data)/sizeof(data[0]); \
 		constexpr auto obfuscator = ay::make_obfuscator<n, key>(data); \
 		static auto obfuscated_data = ay::obfuscated_data<n, key>(obfuscator); \

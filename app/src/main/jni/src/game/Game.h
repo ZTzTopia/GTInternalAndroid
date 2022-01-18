@@ -1,27 +1,19 @@
 #pragma once
-#include "../main.h"
+#include "Common.h"
+#include "utilities/Macros.h"
 
-class Game {
-public:
-    Game();
-    ~Game() {};
+namespace game {
+    class Game {
+    public:
+        Game();
+        ~Game() {};
 
-    void HackRender();
+        void init();
 
-    void ModFly(bool checked);
-    void AntiCheckpoint(bool checked);
-	void FastFall(bool checked);
+        bool get_cheat_state(const std::string &cheat_name);
 
-private:
-    struct {
-        MemoryPatch ModFly;
-        MemoryPatch AntiCheckpoint;
-		MemoryPatch FastFall;
-    } m_gameHack;
-
-    struct _stGameHackState {
-        bool ModFlyChecked;
-        bool AntiCheckpointChecked;
-		bool FastFallChecked;
-    } m_gameHackState;
-};
+    public:
+        float m_fpsLimit;
+        std::vector<_CheatList> m_cheat_list;
+    }; // class Game
+} // namespace game

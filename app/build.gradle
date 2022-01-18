@@ -2,40 +2,50 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 30
+
     defaultConfig {
         applicationId 'com.ztz.modmenu'
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 1
-        versionName '2.9'
+        versionCode 10
+        versionName '0.1.0'
+        
         ndk {
-            abiFilters 'armeabi-v7a'
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
+
         externalNativeBuild {
-            cmake {
-                version '3.18.1'
-                arguments '-GNinja', '-DCMAKE_ANDROID_NDK=C:/Users/Kiky/AppData/Local/Android/Sdk/ndk/21.4.7075529', '-DCMAKE_TOOLCHAIN_FILE=toolchains/android.cmake'
+            ndkBuild {
+                arguments getProcessesCountArg()
             }
         }
-        signingConfig signingConfigs.debug
+        
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
-        release {
-            shrinkResources false
+        debug {
             minifyEnabled false
+            shrinkResources false
+            zipAlignEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        debug {
-            shrinkResources false
-            minifyEnabled false
+        release {
+            minifyEnabled true
+            shrinkResources true
+            zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path 'src/main/jni/CMakeLists.txt'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDir 'src/main/jniLibs'
         }
     }
 
@@ -45,4 +55,16 @@ android {
 //dependencies must be placed below 'android' brackets to get it work on AIDE
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+def getProcessesCountArg() {
+    def procCount = Runtime.runtime.availableProcessors()
+
+    Gradle gradle = getGradle()
+    def isClean = gradle.getStartParameter().getTaskNames().find { it ==~ /.*clean.*/ }
+    if (isClean) {
+        procCount = 1
+    }
+
+    return "-j" + procCount
 }

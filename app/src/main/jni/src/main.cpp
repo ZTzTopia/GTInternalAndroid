@@ -1,82 +1,59 @@
-#include <unistd.h>
-#include <pthread.h>
-#include <jni.h>
+/*
+ *
+ * DEVELOPER: ZTz
+ * PROJECT: GTInternalAndroid
+ * VERSION: 0.3
+ *
+ * ============================================================================
+ *
+ * Features:
+ * Many useful cheats.
+ * Debug enet client packet.
+ * Multi bot.
+ * And many useful features.
+ *
+ */
+
 #include <android/log.h>
 #include <dlfcn.h>
+#include <pthread.h>
+#include <unistd.h>
 
-#include "main.h"
-#include "game/Game.h"
-#include "gui/Gui.h"
-#include "utilities/Logging.h"
+#include "Main.h"
+#include "game/Hook.h"
 #include "utilities/CrashDump.h"
-#include "utilities/Utils.h"
 
-bool g_initialized = false;
+JavaVM *g_java_vm{ nullptr };
+void *g_growtopia_handle{ nullptr };
+KittyMemory::ProcMap g_growtopia_map{};
 
-void* g_GrowtopiaHandle = nullptr;
-ProcMap g_GrowtopiaMap;
+void *main_thread(void *) {
+    utilities::crash_dump::init();
 
-Game* g_Game = nullptr;
-Gui* g_Gui = nullptr;
-
-void InitHook();
-
-void DoInitStuff() {
-    if (!g_initialized) {
-        g_Game = new Game;
-        g_Gui = new Gui;
-
-        // Init Gui
-        g_Gui->Init();
-
-        g_initialized = true;
-    }
-}
-
-void DoMainPulse() {
-    // Init stuff
-    DoInitStuff();
-
-    // Render the gui (ImGui)
-    if (g_Gui) {
-        g_Gui->Render();
-    }
-}
-
-void* main_thread(void*) {
-    // Load library
     do {
-        g_GrowtopiaMap = KittyMemory::getLibraryMap("libgrowtopia.so");
+        g_growtopia_map = KittyMemory::getLibraryMap(AY_OBFUSCATE("libgrowtopia.so"));
         sleep(1);
-    } while (!g_GrowtopiaMap.isValid());
+    } while (!g_growtopia_map.isValid());
 
-    // This is for dlsym, dladdr
-    g_GrowtopiaHandle = dlopen("libgrowtopia.so", RTLD_NOLOAD);
-    if (g_GrowtopiaHandle == nullptr) {
-        LOGE("dlopen error: %s", dlerror());
-    }
+    do {
+        // This is used for dladdr, dlclose, dlerror, dlopen, dlsym, dlvsym.
+        // Just open the dynamic library don't load it.
+        g_growtopia_handle = dlopen(AY_OBFUSCATE("libgrowtopia.so"), RTLD_NOLOAD);
+        sleep(1);
+    } while (g_growtopia_handle == nullptr);
 
-    LOGI("libgrowtopia.so has been loaded.");
+    game::hook::init();
 
-    // Init hook
-    InitHook();
-
-    // Now we can exit the thread
+    // Now we can exit the thread.
     pthread_exit(nullptr);
 }
 
-__unused __attribute__((constructor)) void constructor_main() {
-    LOGD("Starting Growtopia ModMenu.. Build time: " __DATE__ " " __TIME__);
+__unused __attribute__((constructor))
+void constructor_main() {
+    LOGI(AY_OBFUSCATE("Starting Growtopia ModMenu.. Build time: " __DATE__ " " __TIME__));
 
-    // Init crash dump
-    CrashDump::Init();
-
-    // Create a new thread because we dont want do while loop make main thread stuck
-    pthread_t ptid;
-    pthread_create(&ptid, nullptr, main_thread, nullptr);
-}
-
-// why need this function?
-int main() {
-    return 0;
+    // Create a new thread because we don't want do while loop make main thread
+    // stuck.
+    pthread_t pthread_id{};
+    pthread_create(&pthread_id, nullptr, main_thread, nullptr);
 }

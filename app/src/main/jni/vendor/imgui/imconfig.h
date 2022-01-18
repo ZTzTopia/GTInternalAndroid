@@ -1,13 +1,13 @@
 //-----------------------------------------------------------------------------
 // COMPILE-TIME OPTIONS FOR DEAR IMGUI
 // Runtime options (clipboard callbacks, enabling various features, etc.) can generally be set via the ImGuiIO structure.
-// You can use ImGui::SetAllocatorFunctions() before calling ImGui::CreateContext() to rewire memory allocation functions.
+// You can use Gui::SetAllocatorFunctions() before calling Gui::CreateContext() to rewire memory allocation functions.
 //-----------------------------------------------------------------------------
-// A) You may edit imconfig.h (and not overwrite it when updating Dear ImGui, or maintain a patch/rebased branch with your modifications to it)
+// A) You may edit imconfig.h (and not overwrite it when updating Dear Gui, or maintain a patch/rebased branch with your modifications to it)
 // B) or '#define IMGUI_USER_CONFIG "my_imgui_config.h"' in your project and then add directives in your own file without touching this template.
 //-----------------------------------------------------------------------------
-// You need to make sure that configuration settings are defined consistently _everywhere_ Dear ImGui is used, which include the imgui*.cpp
-// files but also _any_ of your code that uses Dear ImGui. This is because some compile-time options have an affect on data structures.
+// You need to make sure that configuration settings are defined consistently _everywhere_ Dear Gui is used, which include the imgui*.cpp
+// files but also _any_ of your code that uses Dear Gui. This is because some compile-time options have an affect on data structures.
 // Defining those options in imconfig.h will ensure every compilation unit gets to see the same data structure layouts.
 // Call IMGUI_CHECKVERSION() from your .cpp files to verify that the data structures your files are using are matching the ones imgui.cpp is using.
 //-----------------------------------------------------------------------------
@@ -20,7 +20,7 @@
 //#define IM_ASSERT(_EXPR)  ((void)(_EXPR))     // Disable asserts
 
 //---- Define attributes of all API symbols declarations, e.g. for DLL under Windows
-// Using Dear ImGui via a shared library is not recommended, because of function call overhead and because we don't guarantee backward nor forward ABI compatibility.
+// Using Dear Gui via a shared library is not recommended, because of function call overhead and because we don't guarantee backward nor forward ABI compatibility.
 // DLL users: heaps and globals are not shared across DLL boundaries! You will need to call SetCurrentContext() + SetAllocatorFunctions()
 // for each static/DLL boundary you are calling from. Read "Context and Memory Allocators" section of imgui.cpp for more details.
 //#define IMGUI_API __declspec( dllexport )
@@ -29,11 +29,11 @@
 //---- Don't define obsolete functions/enums/behaviors. Consider enabling from time to time after updating to avoid using soon-to-be obsolete function/names.
 //#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 
-//---- Disable all of Dear ImGui or don't implement standard windows.
+//---- Disable all of Dear Gui or don't implement standard windows.
 // It is very strongly recommended to NOT disable the demo windows during development. Please read comments in imgui_demo.cpp.
 //#define IMGUI_DISABLE                                     // Disable everything: all headers and source files will be empty.
 //#define IMGUI_DISABLE_DEMO_WINDOWS                        // Disable demo windows: ShowDemoWindow()/ShowStyleEditor() will be empty. Not recommended.
-//#define IMGUI_DISABLE_METRICS_WINDOW                      // Disable metrics/debugger window: ShowMetricsWindow() will be empty.
+//#define IMGUI_DISABLE_METRICS_WINDOW                      // Disable metrics/debugger and other debug tools: ShowMetricsWindow() and ShowStackToolWindow() will be empty.
 
 //---- Don't implement some functions to reduce linkage requirements.
 //#define IMGUI_DISABLE_WIN32_DEFAULT_CLIPBOARD_FUNCTIONS   // [Win32] Don't implement default clipboard handler. Won't use and link with OpenClipboard/GetClipboardData/CloseClipboard etc. (user32.lib/.a, kernel32.lib/.a)
@@ -45,7 +45,7 @@
 //#define IMGUI_DISABLE_DEFAULT_MATH_FUNCTIONS              // Don't implement ImFabs/ImSqrt/ImPow/ImFmod/ImCos/ImSin/ImAcos/ImAtan2 so you can implement them yourself.
 //#define IMGUI_DISABLE_FILE_FUNCTIONS                      // Don't implement ImFileOpen/ImFileClose/ImFileRead/ImFileWrite and ImFileHandle at all (replace them with dummies)
 //#define IMGUI_DISABLE_DEFAULT_FILE_FUNCTIONS              // Don't implement ImFileOpen/ImFileClose/ImFileRead/ImFileWrite and ImFileHandle so you can implement them yourself if you don't want to link with fopen/fclose/fread/fwrite. This will also disable the LogToTTY() function.
-//#define IMGUI_DISABLE_DEFAULT_ALLOCATORS                  // Don't implement default allocators calling malloc()/free() to avoid linking with them. You will need to call ImGui::SetAllocatorFunctions().
+//#define IMGUI_DISABLE_DEFAULT_ALLOCATORS                  // Don't implement default allocators calling malloc()/free() to avoid linking with them. You will need to call Gui::SetAllocatorFunctions().
 //#define IMGUI_DISABLE_SSE                                 // Disable use of SSE intrinsics even if available
 
 //---- Include imgui_user.h at the end of imgui.h as a convenience
@@ -58,7 +58,7 @@
 //#define IMGUI_USE_WCHAR32
 
 //---- Avoid multiple STB libraries implementations, or redefine path/filenames to prioritize another version
-// By default the embedded implementations are declared static and not available outside of Dear ImGui sources files.
+// By default the embedded implementations are declared static and not available outside of Dear Gui sources files.
 //#define IMGUI_STB_TRUETYPE_FILENAME   "my_folder/stb_truetype.h"
 //#define IMGUI_STB_RECT_PACK_FILENAME  "my_folder/stb_rect_pack.h"
 //#define IMGUI_DISABLE_STB_TRUETYPE_IMPLEMENTATION
@@ -68,7 +68,7 @@
 // Requires 'stb_sprintf.h' to be available in the include path. Compatibility checks of arguments and formats done by clang and GCC will be disabled in order to support the extra formats provided by STB sprintf.
 // #define IMGUI_USE_STB_SPRINTF
 
-//---- Use FreeType to build and rasterize the font atlas (instead of stb_truetype which is embedded by default in Dear ImGui)
+//---- Use FreeType to build and rasterize the font atlas (instead of stb_truetype which is embedded by default in Dear Gui)
 // Requires FreeType headers to be available in the include path. Requires program to be compiled with 'misc/freetype/imgui_freetype.cpp' (in this repository) + the FreeType library (not provided).
 // On Windows you may use vcpkg with 'vcpkg install freetype --triplet=x64-windows' + 'vcpkg integrate install'.
 //#define IMGUI_ENABLE_FREETYPE
@@ -114,9 +114,9 @@
 //---- Debug Tools: Enable slower asserts
 //#define IMGUI_DEBUG_PARANOID
 
-//---- Tip: You can add extra functions within the ImGui:: namespace, here or in your own headers files.
+//---- Tip: You can add extra functions within the Gui:: namespace, here or in your own headers files.
 /*
-namespace ImGui
+namespace Gui
 {
     void MyFunction(const char* name, const MyMatrix44& v);
 }

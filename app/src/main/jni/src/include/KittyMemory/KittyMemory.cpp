@@ -4,10 +4,7 @@
 //  Created by MJ (Ruit) on 1/1/19.
 //
 
-#include <unistd.h>
-#include <android/log.h>
-
-#include "KittyMemory.hpp"
+#include "KittyMemory.h"
 
 using KittyMemory::Memory_Status;
 using KittyMemory::ProcMap;
@@ -30,7 +27,7 @@ static ProcMap findMapInCache(std::string id){
 }
 
 int KittyMemory::GetMemoryPermission(void* address) {
-    unsigned long addr = (unsigned long)address;
+    auto addr = (unsigned long)address;
     char line[PATH_MAX] = {0};
 
     FILE *fp = fopen("/proc/self/maps", "r");
@@ -112,21 +109,20 @@ Memory_Status KittyMemory::memWrite(void *addr, const void *buffer, size_t len) 
     if (len < 1 || len > INT_MAX)
         return INV_LEN;
 
-    int prot = GetMemoryPermission(addr);
-    if (prot == 0) {
-        return INV_PROT;
-    }
+//    int prot = GetMemoryPermission(addr);
+//    if (prot == 0)
+//        return INV_PROT;
 
-    if (!(prot & PROT_WRITE)) {
+//    if (!(prot & PROT_WRITE)) {
         if (!ProtectAddr(addr, len, _PROT_RWX_))
             return INV_PROT;
-    }
+//    }
 
     if (memcpy(addr, buffer, len) != nullptr) {
-        if (!(prot & PROT_WRITE)) {
-            if (!ProtectAddr(addr, len, prot))
-                return INV_PROT;
-        }
+//        if (!(prot & PROT_WRITE)) {
+//            if (!ProtectAddr(addr, len, prot))
+//                return INV_PROT;
+//        }
 
         return SUCCESS;
     }
@@ -134,7 +130,7 @@ Memory_Status KittyMemory::memWrite(void *addr, const void *buffer, size_t len) 
     return FAILED;
 }
 
-Memory_Status KittyMemory::memRead(void *buffer, const void *addr, size_t len) {
+Memory_Status KittyMemory::memRead(void *buffer, void *addr, size_t len) {
     if (addr == nullptr)
         return INV_ADDR;
 
@@ -144,13 +140,28 @@ Memory_Status KittyMemory::memRead(void *buffer, const void *addr, size_t len) {
     if (len < 1 || len > INT_MAX)
         return INV_LEN;
 
-    if (memcpy(buffer, addr, len) != nullptr)
+//    int prot = GetMemoryPermission(addr);
+//    if (prot == 0)
+//        return INV_PROT;
+
+//    if (!(prot & PROT_READ)) {
+        if (!ProtectAddr(addr, len, _PROT_RWX_))
+            return INV_PROT;
+//    }
+
+    if (memcpy(buffer, addr, len) != nullptr) {
+//        if (!(prot & PROT_READ)) {
+//            if (!ProtectAddr(addr, len, prot))
+//                return INV_PROT;
+//        }
+
         return SUCCESS;
+    }
 
     return FAILED;
 }
 
-std::string KittyMemory::read2HexStr(const void *addr, size_t len) {
+std::string KittyMemory::read2HexStr(void *addr, size_t len) {
     char temp[len];
     memset(temp, 0, len);
 	
@@ -160,7 +171,7 @@ std::string KittyMemory::read2HexStr(const void *addr, size_t len) {
 
     std::string ret;
 
-    if (memRead(temp, addr, len) != SUCCESS)
+    if (memRead(temp, reinterpret_cast<void *>(addr), len) != SUCCESS)
         return ret;
 
     for (int i = 0; i < len; i++) {
@@ -178,23 +189,34 @@ Memory_Status KittyMemory::makeNOP(void *ptr, size_t len) {
     if (len < 1 || len > INT_MAX)
         return INV_LEN;
 
-    if (!ProtectAddr(ptr, len, _PROT_RWX_))
-        return INV_PROT;
+//    int prot = GetMemoryPermission(ptr);
+//    if (prot == 0)
+//        return INV_PROT;
 
-    uintptr_t finalPtr = reinterpret_cast<uintptr_t>(ptr);
+//    if (!(prot & PROT_WRITE)) {
+        if (!ProtectAddr(ptr, len, _PROT_RWX_))
+            return INV_PROT;
+//    }
+
+    auto finalPtr = reinterpret_cast<uintptr_t>(ptr);
     for (uintptr_t ptr = finalPtr; ptr != (finalPtr + (len * 4)); ptr += 4) {
-#if defined(__aarch64__)
-        /* ~ */
-#elif defined(__arm__)
+#ifdef __arm__
         *(char*)ptr = 0x00;
         *(char*)(ptr+1) = 0xF0;
         *(char*)(ptr+2) = 0x20;
         *(char*)(ptr+3) = 0xE3;
+#elif __aarch64__
+        *(char*)ptr = 0x1F;
+        *(char*)(ptr+1) = 0x20;
+        *(char*)(ptr+2) = 0x03;
+        *(char*)(ptr+3) = 0xD5;
 #endif
     }
 
-    if (!ProtectAddr(ptr, len, _PROT_RX_))
-        return INV_PROT;
+//    if (!(prot & PROT_WRITE)) {
+//        if (!ProtectAddr(ptr, len, prot))
+//            return INV_PROT;
+//    }
 
     return SUCCESS;
 }

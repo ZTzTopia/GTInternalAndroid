@@ -4,7 +4,7 @@
 //  Created by MJ (Ruit) on 4/19/20.
 //
 
-#include "MemoryBackup.hpp"
+#include "MemoryBackup.h"
 
 MemoryBackup::MemoryBackup() {
   _address = 0;
@@ -26,7 +26,7 @@ MemoryBackup::MemoryBackup(const char *libraryName, uintptr_t address, size_t ba
     _orig_code.resize(backup_size);
 
     // backup current content
-    KittyMemory::memRead(&_orig_code[0], reinterpret_cast<const void *>(_address), backup_size);
+    KittyMemory::memRead(&_orig_code[0], reinterpret_cast<void *>(_address), backup_size);
 }
 
 
@@ -43,7 +43,7 @@ MemoryBackup::MemoryBackup(uintptr_t absolute_address, size_t backup_size) {
     _orig_code.resize(backup_size);
 
     // backup current content
-    KittyMemory::memRead(&_orig_code[0], reinterpret_cast<const void *>(_address), backup_size);
+    KittyMemory::memRead(&_orig_code[0], reinterpret_cast<void *>(_address), backup_size);
 }
 
 MemoryBackup::~MemoryBackup() {
@@ -72,7 +72,7 @@ std::string MemoryBackup::get_CurrBytes() {
     if (!isValid())
         _hexString = std::string("0xInvalid");
     else
-        _hexString = KittyMemory::read2HexStr(reinterpret_cast<const void *>(_address), _size);
+        _hexString = KittyMemory::read2HexStr(reinterpret_cast<void *>(_address), _size);
 
     return _hexString;
 }
