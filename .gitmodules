@@ -1,0 +1,6 @@
+[submodule "app/src/main/cpp/vendor/Dobby"]
+	path = vendor/Dobby
+	url = https://github.com/jmpews/Dobby
+[submodule "app/src/main/cpp/vendor/imgui"]
+	path = vendor/imgui
+	url = https://github.com/ocornut/imgui
