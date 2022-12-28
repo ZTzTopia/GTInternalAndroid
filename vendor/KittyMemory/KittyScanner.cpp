@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "KittyScanner.h"
 
 #include "KittyMemory.h"
