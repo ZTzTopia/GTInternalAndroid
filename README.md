@@ -44,4 +44,4 @@ Android 5.0 Lollipop (SDK 21) ~ 13 Tiramisu (SDK 33)
 - [KittyMemory](https://github.com/MJx0/KittyMemory): Runtime code patching
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/ZTzTopia/GTLauncherAndroid/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/ZTzTopia/GTInternalAndroid/blob/main/LICENSE) file for details.
